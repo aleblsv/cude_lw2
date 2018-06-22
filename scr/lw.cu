@@ -40,7 +40,7 @@ __global__ void LW_Kernel_Min2(float *pMin_d, float *pV_d, int *pPsy_d, int m_le
 
     if (i_m < m_len)
     {
-        pMin_d[i_m] = FLOAT_MAX;
+        memset(&pMin_d[i_m], 0xff, sizeof(float));
         for (j = 0; j < M_len; j++)
         {
             if(pU_d[j] == 1)

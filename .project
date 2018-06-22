@@ -24,4 +24,16 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>inc</name>
+			<type>2</type>
+			<location>/home/alex/cuda-workspace/lw/inc</location>
+		</link>
+		<link>
+			<name>scr</name>
+			<type>2</type>
+			<location>/home/alex/cuda-workspace/lw/scr</location>
+		</link>
+	</linkedResources>
 </projectDescription>
