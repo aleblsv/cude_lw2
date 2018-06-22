@@ -33,7 +33,8 @@
  *@param
  *@retval None
  */
-__global__ void LW_Kernel_Min2(float *pMin_d, float *pV_d, int *pPsy_d, int m_len, int *pU_d, int M_len, int *pIndex_Out_d)
+__global__ void
+LW_Kernel_Min2(float *pMin_d, float *pV_d, int *pPsy_d, int m_len, int *pU_d, int M_len, int *pIndex_Out_d)
 {
     int i_m = blockDim.x * blockIdx.x + threadIdx.x;
     int j;
@@ -43,9 +44,9 @@ __global__ void LW_Kernel_Min2(float *pMin_d, float *pV_d, int *pPsy_d, int m_le
         memset(&pMin_d[i_m], 0xff, sizeof(float));
         for (j = 0; j < M_len; j++)
         {
-            if(pU_d[j] == 1)
+            if (pU_d[j] == 1)
             {
-                if(pPsy_d[i_m] == j)
+                if (pPsy_d[i_m] == j)
                 {
                     pMin_d[i_m] = pV_d[i_m];
                     break;
@@ -86,7 +87,7 @@ static void _LW_Launch_Min2(float *pV, int *pPsy, int m_len, int *pU, int M_len,
     int threadsPerBlock = LW_THREADS_PER_BLOCK;
     int blocksPerGrid = (m_len + threadsPerBlock - 1) / threadsPerBlock;
     // launch kernel
-    LW_Kernel_Min2 <<< blocksPerGrid, threadsPerBlock >>> (pMin_d, pV_d, pPsy_d, m_len, pU_d, M_len, pIndex_Out_d);
+    LW_Kernel_Min2 << < blocksPerGrid, threadsPerBlock >> > (pMin_d, pV_d, pPsy_d, m_len, pU_d, M_len, pIndex_Out_d);
     cudaDeviceSynchronize();
 
     // Copy result from Device memory to Host memory
@@ -133,25 +134,13 @@ void LW_Calculate_Min2(float *pV, int *pPsy, int m_len, int *pU, int M_len, int 
  */
 void LW_Test_Min2(void)
 {
-    float v_arr[] = {4, 52, 11, 5, 6, 7, 8, 9, 10};
-    int psy_arr[] = {0, 2, 9, 9, 9, 9, 9, 9, 0};
-    int u_arr[] =   {1, 0, 1};
+    int index = 0;
+    float v_arr[9] = {4, 52, 11, 5, 6, 7, 8, 9, 10};
+    int psy_arr[9] = {0, 2, 9, 9, 9, 9, 9, 9, 0};
+    int u_arr[3] = {1, 0, 1};
 
     printf("Start Test\n");
-    if((pData_Arr == NULL) || (pLZ_Arr == NULL))
-    {
-        printf("Can't Allocate Memory, return\n");
-        return;
-    }
-
-    /* initialize random seed: */
-    srand(time(NULL));
-
-
-    LZMP_Calculate(pData_Arr, LZMP_TEST_SPEED_NUMOF_NODES, pLZ_Arr);
-
-    printf("Stop Test\n");
-    free(pData_Arr);
-    free(pLZ_Arr);
+    LW_Calculate_Min2(v_arr, psy_arr, 9, u_arr, 3, &index);
+    printf("Stop Test, v[%d]=%f\n", index, v_arr[index]);
 }
 

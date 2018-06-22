@@ -11,14 +11,11 @@
 /* Global define -----------------------------------------------------------*/
 #define LW_ARRAY_MAX_SIZE             48000
 
-// Test Speed function interface
-#define LW_TEST_SPEED_PRINT_ENABLE
-#define LW_TEST_SPEED_NUMOF_NODES     2
-
 /* Global typedef ----------------------------------------------------------*/
 
 /* Global Call back functions ----------------------------------------------*/
 /* Global function prototypes ----------------------------------------------*/
 void LW_Calculate_Min2(float *pV, int *pPsy, int m_len, int *pU, int M_len, int *pIndex_Out);
+void LW_Test_Min2(void);
 
 #endif //LW_H

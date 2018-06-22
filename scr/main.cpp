@@ -5,7 +5,7 @@
  *      Author: alex
  */
 
-#include <lzmp.h>
+#include <lw.h>
 
 /**
  *@brief  Main function
@@ -13,7 +13,7 @@
  *@param  argv: pointer to an array of strings
  *@retval int
  */
-int main(int argc, char* argv[]) {
-	//LZMP_Test_Speed();
-	LZMP_Test_Dictionary();
+int main(int argc, char *argv[])
+{
+    LW_Test_Min2();
 }
