@@ -64,7 +64,7 @@ LW_Kernel_Min2(float *pMin_d, float *pV_d, int *pPsy_d, int m_len, int *pU_d, in
  *@param
  *@retval None
  */
-static void _LW_Launch_Min2(float *pV, int *pPsy, int m_len, int *pU, int M_len, int *pIndex_Out)
+static void _LW_Launch_Min2(float *pV, int *pPsy, int m_len, int *pU, int M_len, int *pIndex_Out, float *pMin_Out)
 {
     float *pMin_d;
     float *pV_d;
@@ -87,11 +87,12 @@ static void _LW_Launch_Min2(float *pV, int *pPsy, int m_len, int *pU, int M_len,
     int threadsPerBlock = LW_THREADS_PER_BLOCK;
     int blocksPerGrid = (m_len + threadsPerBlock - 1) / threadsPerBlock;
     // launch kernel
-    LW_Kernel_Min2 << < blocksPerGrid, threadsPerBlock >> > (pMin_d, pV_d, pPsy_d, m_len, pU_d, M_len, pIndex_Out_d);
+    LW_Kernel_Min2 <<< blocksPerGrid, threadsPerBlock >>> (pMin_d, pV_d, pPsy_d, m_len, pU_d, M_len, pIndex_Out_d);
     cudaDeviceSynchronize();
 
     // Copy result from Device memory to Host memory
     checkCudaErrors(cudaMemcpy(pIndex_Out, pIndex_Out_d, sizeof(int), cudaMemcpyDeviceToHost));
+    checkCudaErrors(cudaMemcpy(pMin_Out, pMin_d, m_len, cudaMemcpyDeviceToHost));
 
     // Free Device memory
     checkCudaErrors(cudaFree(pMin_d));
@@ -114,17 +115,22 @@ static void _LW_Launch_Min2(float *pV, int *pPsy, int m_len, int *pU, int M_len,
 void LW_Calculate_Min2(float *pV, int *pPsy, int m_len, int *pU, int M_len, int *pIndex_Out)
 {
     StopWatchInterface *timer = NULL;
+    float *ptMin = (float*)malloc(m_len * sizeof(float));
 
-    printf("\nGPU kernel - Start\n");
-    sdkCreateTimer(&timer);
-    sdkResetTimer(&timer);
+    if(ptMin != NULL)
+    {
+        printf("\nGPU kernel - Start\n");
+        sdkCreateTimer(&timer);
+        sdkResetTimer(&timer);
 
-    sdkStartTimer(&timer);
-    _LW_Launch_Min2(pV, pPsy, m_len, pU, M_len, pIndex_Out);
-    sdkStopTimer(&timer);
+        sdkStartTimer(&timer);
+        _LW_Launch_Min2(pV, pPsy, m_len, pU, M_len, pIndex_Out, ptMin);
+        sdkStopTimer(&timer);
 
-    printf("GPU kernel - Complete, time:%fms\n", sdkGetTimerValue(&timer));
-    sdkDeleteTimer(&timer);
+        free(ptMin);
+        printf("GPU kernel - Complete, time:%fms\n", sdkGetTimerValue(&timer));
+        sdkDeleteTimer(&timer);
+    }
 }
 
 /**
