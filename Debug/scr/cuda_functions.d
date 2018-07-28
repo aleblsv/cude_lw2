@@ -67,7 +67,7 @@ scr/cuda_functions.o : ../scr/cuda_functions.cu \
     /usr/include/x86_64-linux-gnu/bits/huge_val.h \
     /usr/include/x86_64-linux-gnu/bits/huge_valf.h \
     /usr/include/x86_64-linux-gnu/bits/huge_vall.h \
-    /usr/include/x86_64-linux-gnu/bits/inf.h \
+    /usr/include/x86_64-linux-gnu/bits/MAX_MIN_INF.h \
     /usr/include/x86_64-linux-gnu/bits/nan.h \
     /usr/include/x86_64-linux-gnu/bits/mathdef.h \
     /usr/include/x86_64-linux-gnu/bits/mathcalls.h \

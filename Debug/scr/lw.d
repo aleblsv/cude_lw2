@@ -74,7 +74,7 @@ scr/lw.o : /home/alex/cuda-workspace/lw/scr/lw.cu \
     /usr/include/bits/huge_val.h \
     /usr/include/bits/huge_valf.h \
     /usr/include/bits/huge_vall.h \
-    /usr/include/bits/inf.h \
+    /usr/include/bits/MAX_MIN_INF.h \
     /usr/include/bits/nan.h \
     /usr/include/bits/mathdef.h \
     /usr/include/bits/mathcalls.h \

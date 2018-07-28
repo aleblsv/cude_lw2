@@ -13,6 +13,7 @@
 
 #include <helper_cuda.h>
 #include <helper_functions.h>
+#include "max_min.h"
 
 /* Private define ------------------------------------------------------------*/
 
@@ -23,6 +24,7 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
+static void _LW_Launch_Min2(float *pV, int *pPsy, int m_len, int *pU, int M_len, int *pIndex_Out, float *pMin_Out);
 /* Private variables ---------------------------------------------------------*/
 
 /* ---------------------------------------------------------------------------*/
@@ -33,14 +35,15 @@
  *@retval None
  */
 __global__ void
-LW_Kernel_Min2(float *pMin_d, float *pV_d, int *pPsy_d, int m_len, int *pU_d, int M_len, int *pIndex_Out_d)
+LW_Kernel_Min2(float *pMin_d, float *pV_d, int *pPsy_d, int m_len, int *pU_d, int M_len, int *pIndex_Out_d, int *mutex)
 {
     int i_m = blockDim.x * blockIdx.x + threadIdx.x;
     int j;
+    float minVal;
 
     if (i_m < m_len)
     {
-        pMin_d[i_m] = 9999;
+        pMin_d[i_m] = MAX_MIN_INF;
         for (j = 0; j < M_len; j++)
         {
             if (pU_d[j] == 1)
@@ -55,7 +58,7 @@ LW_Kernel_Min2(float *pMin_d, float *pV_d, int *pPsy_d, int m_len, int *pU_d, in
     }
     __syncthreads();
 
-    // Calculate minimum in array
+    find_minimum_index_kernel(pMin_d, &minVal, pIndex_Out_d, mutex, m_len);
 }
 
 /**
@@ -70,6 +73,7 @@ static void _LW_Launch_Min2(float *pV, int *pPsy, int m_len, int *pU, int M_len,
     int *pPsy_d;
     int *pU_d;
     int *pIndex_Out_d;
+    int *d_mutex;
 
     // Allocate memory on  Device
     checkCudaErrors(cudaMalloc((void **) &pMin_d, m_len * sizeof(float)));
@@ -77,16 +81,19 @@ static void _LW_Launch_Min2(float *pV, int *pPsy, int m_len, int *pU, int M_len,
     checkCudaErrors(cudaMalloc((void **) &pPsy_d, m_len * sizeof(float)));
     checkCudaErrors(cudaMalloc((void **) &pU_d, M_len * sizeof(int)));
     checkCudaErrors(cudaMalloc((void **) &pIndex_Out_d, sizeof(int)));
+    checkCudaErrors(cudaMalloc((void **) &d_mutex, sizeof(int)));
 
     // Copy data from Host memory to Device memory
     checkCudaErrors(cudaMemcpy(pV_d, pV, m_len * sizeof(float), cudaMemcpyHostToDevice));
     checkCudaErrors(cudaMemcpy(pPsy_d, pPsy, m_len * sizeof(float), cudaMemcpyHostToDevice));
     checkCudaErrors(cudaMemcpy(pU_d, pU, M_len * sizeof(int), cudaMemcpyHostToDevice));
+    checkCudaErrors(cudaMemset(d_mutex, 0, sizeof(int)));
 
     int threadsPerBlock = LW_THREADS_PER_BLOCK;
     int blocksPerGrid = (m_len + threadsPerBlock - 1) / threadsPerBlock;
     // launch kernel
-    LW_Kernel_Min2 << < blocksPerGrid, threadsPerBlock >> > (pMin_d, pV_d, pPsy_d, m_len, pU_d, M_len, pIndex_Out_d);
+    LW_Kernel_Min2 << < blocksPerGrid, threadsPerBlock >> >
+                                       (pMin_d, pV_d, pPsy_d, m_len, pU_d, M_len, pIndex_Out_d, d_mutex);
     cudaDeviceSynchronize();
 
     // Copy result from Device memory to Host memory
@@ -99,6 +106,7 @@ static void _LW_Launch_Min2(float *pV, int *pPsy, int m_len, int *pU, int M_len,
     checkCudaErrors(cudaFree(pPsy_d));
     checkCudaErrors(cudaFree(pU_d));
     checkCudaErrors(cudaFree(pIndex_Out_d));
+    checkCudaErrors(cudaFree(d_mutex));
 }
 
 /**
