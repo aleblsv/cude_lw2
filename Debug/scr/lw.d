@@ -214,4 +214,5 @@ scr/lw.o : /home/alex/cuda-workspace/lw/scr/lw.cu \
     /usr/include/c++/5.3.1/ctime \
     /usr/include/sys/time.h \
     /usr/local/cuda/samples/common/inc/helper_image.h \
-    /home/alex/cuda-workspace/lw/inc/max_min.h
+    /home/alex/cuda-workspace/lw/inc/max_min.h \
+    /home/alex/cuda-workspace/lw/inc/config.h

@@ -120,7 +120,7 @@ static void _LW_Launch_Min2(float *pV, int *pPsy, int m_len, int *pU, int M_len,
 void LW_Calculate_Min2(float *pV, int *pPsy, int m_len, int *pU, int M_len, int *pIndex_Out)
 {
     StopWatchInterface *timer = NULL;
-    float ptMin[m_len];
+    float *ptMin = (float*)malloc(m_len * sizeof(float));
 
     printf("\nGPU kernel - Start\n");
     sdkCreateTimer(&timer);
@@ -132,6 +132,12 @@ void LW_Calculate_Min2(float *pV, int *pPsy, int m_len, int *pU, int M_len, int 
 
     printf("GPU kernel - Complete, time:%fms\n", sdkGetTimerValue(&timer));
     sdkDeleteTimer(&timer);
+
+    for	(int i = 0; i < m_len; i++)
+    {
+    	printf("%.2f\n", ptMin[i]);
+    }
+    free(ptMin);
 }
 
 /**
@@ -142,7 +148,7 @@ void LW_Calculate_Min2(float *pV, int *pPsy, int m_len, int *pU, int M_len, int 
 void LW_Test_Min2(void)
 {
     int index = 0;
-    float v_arr[9] = {4, 52, 11, 5, 6, 7, 8, 9, 10};
+    float v_arr[9] = {10, 52, 11, 5, 6, 7, 8, 9, 4};
     int psy_arr[9] = {0, 2, 9, 9, 9, 9, 9, 9, 0};
     int u_arr[3] = {1, 0, 1};
 
