@@ -11,10 +11,8 @@
 #include "jetbrains_ide.h"
 
 /* Global define -----------------------------------------------------------*/
-#define LW_ARRAY_MAX_SIZE             48000
 
 /* Global typedef ----------------------------------------------------------*/
-
 /* Global Call back functions ----------------------------------------------*/
 /* Global function prototypes ----------------------------------------------*/
 void LW_Calculate_Min2(float *pV, int *pPsy, int m_len, int *pU, int M_len, int *pIndex_Out);

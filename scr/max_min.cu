@@ -6,6 +6,7 @@
 //
 
 #include "max_min.h"
+#include "config.h"
 
 /* Private define ------------------------------------------------------------*/
 /* Private typedef -----------------------------------------------------------*/
@@ -26,7 +27,7 @@ __global__ void find_maximum_kernel(float *array, float *max, int *mutex, unsign
     unsigned int stride = gridDim.x * blockDim.x;
     unsigned int offset = 0;
 
-    __shared__ float cache[256];
+    __shared__ float cache[CONFIG_THREADS_PER_BLOCK];
 
 
     float temp = -MAX_MIN_INF;
@@ -74,8 +75,8 @@ __global__ void find_maximum_index_kernel(float *array, float *max, int *maxInde
     unsigned int index = threadIdx.x + blockIdx.x * blockDim.x;
     unsigned int stride = gridDim.x * blockDim.x;
     unsigned int offset = 0;
-    __shared__ float cache[256];
-    __shared__ int indexCache[256];
+    __shared__ float cache[CONFIG_THREADS_PER_BLOCK];
+    __shared__ int indexCache[CONFIG_THREADS_PER_BLOCK];
 
     float temp = -1.0;
     int tempIndex = 0;
@@ -131,7 +132,7 @@ __global__ void find_minimum_kernel(float *array, float *min, int *mutex, unsign
     unsigned int stride = gridDim.x * blockDim.x;
     unsigned int offset = 0;
 
-    __shared__ float cache[256];
+    __shared__ float cache[CONFIG_THREADS_PER_BLOCK];
 
 
     float temp = MAX_MIN_INF;
@@ -179,8 +180,8 @@ __device__ void find_minimum_index_kernel(float *array, float *min, int *minInde
     unsigned int index = threadIdx.x + blockIdx.x * blockDim.x;
     unsigned int stride = gridDim.x * blockDim.x;
     unsigned int offset = 0;
-    __shared__ float cache[256];
-    __shared__ int indexCache[256];
+    __shared__ float cache[CONFIG_THREADS_PER_BLOCK];
+    __shared__ int indexCache[CONFIG_THREADS_PER_BLOCK];
 
     float temp = MAX_MIN_INF;
     int tempIndex = 0;

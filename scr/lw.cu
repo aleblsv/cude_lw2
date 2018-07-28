@@ -14,11 +14,9 @@
 #include <helper_cuda.h>
 #include <helper_functions.h>
 #include "max_min.h"
+#include "config.h"
 
 /* Private define ------------------------------------------------------------*/
-
-#define LW_SHARED_MEM_MAX_SIZE         48000  // For Device 3.5
-#define LW_THREADS_PER_BLOCK           1024   // For Device 3.5
 
 /* Private typedef -----------------------------------------------------------*/
 
@@ -89,7 +87,7 @@ static void _LW_Launch_Min2(float *pV, int *pPsy, int m_len, int *pU, int M_len,
     checkCudaErrors(cudaMemcpy(pU_d, pU, M_len * sizeof(int), cudaMemcpyHostToDevice));
     checkCudaErrors(cudaMemset(d_mutex, 0, sizeof(int)));
 
-    int threadsPerBlock = LW_THREADS_PER_BLOCK;
+    int threadsPerBlock = CONFIG_THREADS_PER_BLOCK;
     int blocksPerGrid = (m_len + threadsPerBlock - 1) / threadsPerBlock;
     // launch kernel
     LW_Kernel_Min2 << < blocksPerGrid, threadsPerBlock >> >
@@ -134,7 +132,6 @@ void LW_Calculate_Min2(float *pV, int *pPsy, int m_len, int *pU, int M_len, int 
 
     printf("GPU kernel - Complete, time:%fms\n", sdkGetTimerValue(&timer));
     sdkDeleteTimer(&timer);
-
 }
 
 /**
