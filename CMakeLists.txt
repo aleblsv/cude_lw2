@@ -8,5 +8,7 @@ include_directories(inc)
 add_executable(cude_lw2
         inc/lw.h
         inc/lzmp.h
+        scr/main.cpp
         scr/lw.cu
-        scr/main.cpp)
+        scr/lzmp.cu
+        inc/jetbrains_ide.h)

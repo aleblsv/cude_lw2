@@ -8,6 +8,8 @@
 #ifndef LW_H
 #define LW_H
 
+#include "jetbrains_ide.h"
+
 /* Global define -----------------------------------------------------------*/
 #define LW_ARRAY_MAX_SIZE             48000
 
