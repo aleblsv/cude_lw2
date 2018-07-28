@@ -174,7 +174,7 @@ __global__ void find_minimum_kernel(float *array, float *min, int *mutex, unsign
  *@param
  *@retval None
  */
-__global__ void find_minimum_index_kernel(float *array, float *min, int *maxIndex, int *mutex, unsigned int n)
+__device__ void find_minimum_index_kernel(float *array, float *min, int *minIndex, int *mutex, unsigned int n)
 {
     unsigned int index = threadIdx.x + blockIdx.x * blockDim.x;
     unsigned int stride = gridDim.x * blockDim.x;
@@ -217,7 +217,7 @@ __global__ void find_minimum_index_kernel(float *array, float *min, int *maxInde
     {
         while (atomicCAS(mutex, 0, 1) != 0);  //lock
         *min = cache[0];
-        *maxIndex = indexCache[0];
+        *minIndex = indexCache[0];
         atomicExch(mutex, 0);  //unlock
     }
 }
