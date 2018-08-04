@@ -13,4 +13,5 @@ add_executable(cude_lw2
         scr/lzmp.cu
         scr/max_min.cu
         scr/mat.cu
-        inc/jetbrains_ide.h inc/max_min.h inc/config.h inc/types.h inc/mat.h)
+        scr/misc.cu
+        inc/jetbrains_ide.h inc/max_min.h inc/config.h inc/types.h inc/mat.h inc/misc.h)

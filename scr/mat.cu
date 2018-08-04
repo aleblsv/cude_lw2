@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include "mat.h"
+#include "misc.h"
 
 /* Private define ------------------------------------------------------------*/
 /* Private typedef -----------------------------------------------------------*/
@@ -165,47 +166,6 @@ void MAT_Sum(const Tp_fMat_TypeDef A, const Tp_fMat_TypeDef B, Tp_fMat_TypeDef C
 }
 
 /**
- *@brief Check device compute capability
- *@param
- *@retval None
- */
-void MAT_Check_Device(void)
-{
-    int devID;
-    cudaError_t error;
-    cudaDeviceProp deviceProp;
-    error = cudaGetDevice(&devID);
-
-    if (error != cudaSuccess)
-    {
-        printf("cudaGetDevice returned error %s (code %d), line(%d)\n", cudaGetErrorString(error), error, __LINE__);
-    }
-
-    error = cudaGetDeviceProperties(&deviceProp, devID);
-
-    if (deviceProp.computeMode == cudaComputeModeProhibited)
-    {
-        fprintf(stderr,
-                "Error: device is running in <Compute Mode Prohibited>, no threads can use ::cudaSetDevice().\n");
-        exit(EXIT_SUCCESS);
-    }
-
-    if (error != cudaSuccess)
-    {
-        printf("cudaGetDeviceProperties returned error %s (code %d), line(%d)\n", cudaGetErrorString(error), error,
-               __LINE__);
-    }
-    else
-    {
-        printf("GPU Device %d: \"%s\" with compute capability %d.%d\n\n", devID, deviceProp.name, deviceProp.major,
-               deviceProp.minor);
-    }
-
-    // Use a larger block size for Fermi and above
-    Mat_Block_Size = (deviceProp.major < 2) ? 16 : 32;
-}
-
-/**
  *@brief Print matrices value
  *@param
  *@retval None
@@ -234,6 +194,7 @@ void MAT_Print(Tp_fMat_TypeDef Mat)
  */
 void MAT_Mult_Test(void)
 {
+    MISC_Bl_Size_TypeDef tBl_Size;
     float A_Arr[MAT_TEST_SIZE] = {0.0};
     float B_Arr[MAT_TEST_SIZE] = {0.0};
     float C_Arr[MAT_TEST_SIZE] = {0.0};
@@ -241,7 +202,9 @@ void MAT_Mult_Test(void)
     Tp_fMat_TypeDef h_B;
     Tp_fMat_TypeDef h_C;
 
-    MAT_Check_Device();
+    MISC_Check_Device();
+    tBl_Size = MISC_Get_Block_Size();
+    Mat_Block_Size = tBl_Size.Bl_2d;
 
     h_A.Width = MAT_TEST_WIDTH;
     h_A.Height = MAT_TEST_HEIGHT;
