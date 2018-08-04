@@ -4,8 +4,9 @@
  *  Created on: Jan 21, 2014
  *      Author: alex
  */
+#include <stdio.h>
 
-#include <lw.h>
+#include "lw.h"
 #include "mat.h"
 
 /**
@@ -16,6 +17,6 @@
  */
 int main(int argc, char *argv[])
 {
-//    LW_Test_Min2();
+    //LW_Test_Min2();
     MAT_Mult_Test();
 }

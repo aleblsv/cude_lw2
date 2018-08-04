@@ -1,6 +1,12 @@
 Debug/
 .idea/
 cmake-build-debug/
-lw/
-lw.sln
-lw.VC.db
+doc/
+x64/
+.vs/
+readme.txt
+template_vs2015.sln
+template_vs2015.VC.db
+template_vs2015.vcxproj
+template_vs2015.vcxproj.user
+vc140.pdb

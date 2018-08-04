@@ -2,8 +2,6 @@
 // Created by Alex on 15/6/2018.
 //
 
-#include <lw.h>
-
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
@@ -11,10 +9,9 @@
 #include <time.h>
 #include <stdlib.h>
 
-#include <helper_cuda.h>
-#include <helper_functions.h>
-#include "max_min.h"
 #include "config.h"
+#include "lw.h"
+#include "max_min.h"
 
 /* Private define ------------------------------------------------------------*/
 
@@ -33,11 +30,10 @@ static void _LW_Launch_Min2(float *pV, int *pPsy, int m_len, int *pU, int M_len,
  *@retval None
  */
 __global__ void
-LW_Kernel_Min2(float *pMin_d, float *pV_d, int *pPsy_d, int m_len, int *pU_d, int M_len, int *pIndex_Out_d, int *mutex)
+LW_Kernel_Min2(float *pMin_d, float *pV_d, int *pPsy_d, int m_len, int *pU_d, int M_len)
 {
     int i_m = blockDim.x * blockIdx.x + threadIdx.x;
     int j;
-    float minVal;
 
     if (i_m < m_len)
     {
@@ -54,10 +50,6 @@ LW_Kernel_Min2(float *pMin_d, float *pV_d, int *pPsy_d, int m_len, int *pU_d, in
             }
         }
     }
-    __syncthreads();
-
-    //ToDo: move outside the kernel
-    find_minimum_index_kernel(pMin_d, &minVal, pIndex_Out_d, mutex, m_len);
 }
 
 /**
@@ -67,6 +59,7 @@ LW_Kernel_Min2(float *pMin_d, float *pV_d, int *pPsy_d, int m_len, int *pU_d, in
  */
 static void _LW_Launch_Min2(float *pV, int *pPsy, int m_len, int *pU, int M_len, int *pIndex_Out, float *pMin_Out)
 {
+    float *pMinVal_d;
     float *pMin_d;
     float *pV_d;
     int *pPsy_d;
@@ -81,6 +74,7 @@ static void _LW_Launch_Min2(float *pV, int *pPsy, int m_len, int *pU, int M_len,
     checkCudaErrors(cudaMalloc((void **) &pU_d, M_len * sizeof(int)));
     checkCudaErrors(cudaMalloc((void **) &pIndex_Out_d, sizeof(int)));
     checkCudaErrors(cudaMalloc((void **) &d_mutex, sizeof(int)));
+    checkCudaErrors(cudaMalloc((void **) &pMinVal_d, sizeof(float)));
 
     // Copy data from Host memory to Device memory
     checkCudaErrors(cudaMemcpy(pV_d, pV, m_len * sizeof(float), cudaMemcpyHostToDevice));
@@ -92,7 +86,10 @@ static void _LW_Launch_Min2(float *pV, int *pPsy, int m_len, int *pU, int M_len,
     int blocksPerGrid = (m_len + threadsPerBlock - 1) / threadsPerBlock;
     // launch kernel
     LW_Kernel_Min2 << < blocksPerGrid, threadsPerBlock >> >
-                                       (pMin_d, pV_d, pPsy_d, m_len, pU_d, M_len, pIndex_Out_d, d_mutex);
+                                       (pMin_d, pV_d, pPsy_d, m_len, pU_d, M_len);
+    cudaDeviceSynchronize();
+    find_minimum_index_kernel << < blocksPerGrid, threadsPerBlock >> >
+                                                  (pMin_d, pMinVal_d, pIndex_Out_d, d_mutex, m_len);
     cudaDeviceSynchronize();
 
     // Copy result from Device memory to Host memory
@@ -106,6 +103,7 @@ static void _LW_Launch_Min2(float *pV, int *pPsy, int m_len, int *pU, int M_len,
     checkCudaErrors(cudaFree(pU_d));
     checkCudaErrors(cudaFree(pIndex_Out_d));
     checkCudaErrors(cudaFree(d_mutex));
+    checkCudaErrors(cudaFree(pMinVal_d));
 }
 
 /**

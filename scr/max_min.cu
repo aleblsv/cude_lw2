@@ -5,8 +5,8 @@
 //
 //
 
-#include "max_min.h"
 #include "config.h"
+#include "max_min.h"
 
 /* Private define ------------------------------------------------------------*/
 /* Private typedef -----------------------------------------------------------*/
@@ -175,7 +175,7 @@ __global__ void find_minimum_kernel(float *array, float *min, int *mutex, unsign
  *@param
  *@retval None
  */
-__device__ void find_minimum_index_kernel(float *array, float *min, int *minIndex, int *mutex, unsigned int n)
+__global__ void find_minimum_index_kernel(float *array, float *min, int *minIndex, int *mutex, unsigned int n)
 {
     unsigned int index = threadIdx.x + blockIdx.x * blockDim.x;
     unsigned int stride = gridDim.x * blockDim.x;

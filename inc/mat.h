@@ -7,12 +7,11 @@
 #ifndef MAT_H
 #define MAT_H
 
+#include "config.h"
 #include "types.h"
-
 #include "jetbrains_ide.h"
-/* Global define ------------------------------------------------------------*/
-#define MAT_BLOCK_SIZE      1024
 
+/* Global define ------------------------------------------------------------*/
 /* Global typedef -----------------------------------------------------------*/
 /* Global Call back functions -----------------------------------------------*/
 /* Global function prototypes -----------------------------------------------*/

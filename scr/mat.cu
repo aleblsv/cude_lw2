@@ -10,7 +10,7 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-
+static int Mat_Block_Size = 16;
 /* ---------------------------------------------------------------------------*/
 
 /**
@@ -66,7 +66,7 @@ __global__ void MAT_SumKernel(Tp_fMat_TypeDef A, Tp_fMat_TypeDef B, Tp_fMat_Type
     size_t row = blockIdx.y * blockDim.y + threadIdx.y;
     size_t col = blockIdx.x * blockDim.x + threadIdx.x;
 
-    if (row < A.Height && col < B.Width)
+    if (row < C.Height && col < C.Width)
     {
         MAT_SetElement(C, row, col, (MAT_GetElement(A, row, col) + MAT_GetElement(B, row, col)));
     }
@@ -86,25 +86,25 @@ void MAT_Mult(const Tp_fMat_TypeDef A, const Tp_fMat_TypeDef B, Tp_fMat_TypeDef 
 
     d_A = A;
     Size = A.Width * A.Height * sizeof(float);
-    checkCudaErrors(cudaMalloc(&d_A, Size));
-    checkCudaErrors(cudaMemcpy(d_A, A, Size, cudaMemcpyHostToDevice));
+    checkCudaErrors(cudaMalloc(&d_A.Elements, Size));
+    checkCudaErrors(cudaMemcpy(d_A.Elements, A.Elements, Size, cudaMemcpyHostToDevice));
 
     d_B = B;
     Size = B.Width * B.Height * sizeof(float);
-    checkCudaErrors(cudaMalloc(&d_B, Size));
-    checkCudaErrors(cudaMemcpy(d_B, B, Size, cudaMemcpyHostToDevice));
+    checkCudaErrors(cudaMalloc(&d_B.Elements, Size));
+    checkCudaErrors(cudaMemcpy(d_B.Elements, B.Elements, Size, cudaMemcpyHostToDevice));
 
     d_C = C;
     Size = C.Width * C.Height * sizeof(float);
-    checkCudaErrors(cudaMalloc(&d_C, Size));
+    checkCudaErrors(cudaMalloc(&d_C.Elements, Size));
 
     // Invoke kernel
-    dim3 dimBlock(MAT_BLOCK_SIZE, MAT_BLOCK_SIZE);
+    dim3 dimBlock(Mat_Block_Size, Mat_Block_Size);
     dim3 dimGrid((B.Width + dimBlock.x - 1) / dimBlock.x, (A.Height + dimBlock.y - 1) / dimBlock.y);
     MAT_MulKernel << < dimGrid, dimBlock >> > (d_A, d_B, d_C);
     cudaDeviceSynchronize();
 
-    checkCudaErrors(cudaMemcpy(C.elements, d_C.Elements, Size, cudaMemcpyDeviceToHost));
+    checkCudaErrors(cudaMemcpy(C.Elements, d_C.Elements, Size, cudaMemcpyDeviceToHost));
 
 //    Free device memory
     checkCudaErrors(cudaFree(d_A.Elements));
@@ -134,25 +134,25 @@ void MAT_Sum(const Tp_fMat_TypeDef A, const Tp_fMat_TypeDef B, Tp_fMat_TypeDef C
 
     d_A = A;
     Size = A.Width * A.Height * sizeof(float);
-    checkCudaErrors(cudaMalloc(&d_A, Size));
-    checkCudaErrors(cudaMemcpy(d_A, A, Size, cudaMemcpyHostToDevice));
+    checkCudaErrors(cudaMalloc(&d_A.Elements, Size));
+    checkCudaErrors(cudaMemcpy(d_A.Elements, A.Elements, Size, cudaMemcpyHostToDevice));
 
     d_B = B;
     Size = B.Width * B.Height * sizeof(float);
-    checkCudaErrors(cudaMalloc(&d_B, Size));
-    checkCudaErrors(cudaMemcpy(d_B, B, Size, cudaMemcpyHostToDevice));
+    checkCudaErrors(cudaMalloc(&d_B.Elements, Size));
+    checkCudaErrors(cudaMemcpy(d_B.Elements, B.Elements, Size, cudaMemcpyHostToDevice));
 
     d_C = C;
     Size = C.Width * C.Height * sizeof(float);
-    checkCudaErrors(cudaMalloc(&d_C, Size));
+    checkCudaErrors(cudaMalloc(&d_C.Elements, Size));
 
     // Invoke kernel
-    dim3 dimBlock(MAT_BLOCK_SIZE, MAT_BLOCK_SIZE);
+    dim3 dimBlock(Mat_Block_Size, Mat_Block_Size);
     dim3 dimGrid((C.Width + dimBlock.x - 1) / dimBlock.x, (C.Height + dimBlock.y - 1) / dimBlock.y);
     MAT_SumKernel << < dimGrid, dimBlock >> > (d_A, d_B, d_C);
-    cudaDeviceSynchronize();
+	cudaDeviceSynchronize();
 
-    checkCudaErrors(cudaMemcpy(C.elements, d_C.Elements, Size, cudaMemcpyDeviceToHost));
+    checkCudaErrors(cudaMemcpy(C.Elements, d_C.Elements, Size, cudaMemcpyDeviceToHost));
 
 //    Free device memory
     checkCudaErrors(cudaFree(d_A.Elements));
@@ -202,10 +202,7 @@ void MAT_Check_Device(void)
     }
 
     // Use a larger block size for Fermi and above
-    int block_size = (deviceProp.major < 2) ? 16 : 32;
-
-    dim3 dimsA(5 * 2 * block_size, 5 * 2 * block_size, 1);
-    dim3 dimsB(5 * 4 * block_size, 5 * 2 * block_size, 1);
+    Mat_Block_Size = (deviceProp.major < 2) ? 16 : 32;
 }
 
 /**
@@ -226,8 +223,8 @@ void MAT_Print(Tp_fMat_TypeDef Mat)
     printf("\n");
 }
 
-#define MAT_TEST_WIDTH     256
-#define MAT_TEST_HEIGHT    128
+#define MAT_TEST_WIDTH     4
+#define MAT_TEST_HEIGHT    4
 #define MAT_TEST_SIZE      (MAT_TEST_WIDTH * MAT_TEST_HEIGHT)
 
 /**
@@ -259,10 +256,12 @@ void MAT_Mult_Test(void)
     h_C.Elements = C_Arr;
 
     MAT_SetElement(h_A, 0, 0, 1);
-    MAT_SetElement(h_B, 0, 0, 1);
+	MAT_SetElement(h_A, 1, 1, 2);
+    MAT_SetElement(h_B, 0, 0, 3);
+	MAT_SetElement(h_B, 1, 1, 4);
+
     MAT_Print(h_A);
     MAT_Print(h_B);
-
     MAT_Sum(h_A, h_B, h_C);
     MAT_Print(h_C);
 }

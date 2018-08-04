@@ -10,10 +10,17 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+// includes CUDA
+#include <cuda_runtime.h>
+
+#include <helper_cuda.h>
+#include <helper_functions.h>
+
 /* Global define ------------------------------------------------------------*/
 
 #define CONFIG_SHARED_MEM_MAX_SIZE         48000  // For Device 3.5
-#define CONFIG_THREADS_PER_BLOCK           1024   // For Device 3.5
+//#define CONFIG_THREADS_PER_BLOCK           1024   // For Device 3.5
+#define CONFIG_THREADS_PER_BLOCK           128   //
 
 /* Global typedef -----------------------------------------------------------*/
 /* Global Call back functions -----------------------------------------------*/
