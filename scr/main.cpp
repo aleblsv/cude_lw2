@@ -6,6 +6,7 @@
  */
 
 #include <lw.h>
+#include "mat.h"
 
 /**
  *@brief  Main function
@@ -15,5 +16,6 @@
  */
 int main(int argc, char *argv[])
 {
-    LW_Test_Min2();
+//    LW_Test_Min2();
+    MAT_Mult_Test();
 }

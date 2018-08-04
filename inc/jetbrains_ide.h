@@ -273,4 +273,5 @@ extern uint3 blockIdx;
 extern dim3 blockDim;
 extern uint3 threadIdx;
 extern int warpsize;
+
 #endif

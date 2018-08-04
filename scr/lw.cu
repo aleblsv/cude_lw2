@@ -56,6 +56,7 @@ LW_Kernel_Min2(float *pMin_d, float *pV_d, int *pPsy_d, int m_len, int *pU_d, in
     }
     __syncthreads();
 
+    //ToDo: move outside the kernel
     find_minimum_index_kernel(pMin_d, &minVal, pIndex_Out_d, mutex, m_len);
 }
 
