@@ -2,3 +2,5 @@ Debug/
 .idea/
 cmake-build-debug/
 lw/
+lw.sln
+lw.VC.db
