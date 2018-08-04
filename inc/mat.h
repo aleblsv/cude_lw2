@@ -22,6 +22,7 @@ __host__ __device__ void MAT_SetElement(Tp_fMat_TypeDef Mat, size_t row, size_t 
 void MAT_Mult(const Tp_fMat_TypeDef A, const Tp_fMat_TypeDef B, Tp_fMat_TypeDef C);
 void MAT_Sum(const Tp_fMat_TypeDef A, const Tp_fMat_TypeDef B, Tp_fMat_TypeDef C);
 void MAT_Print(Tp_fMat_TypeDef Mat);
+void MAT_Check_Device(void);
 
 void MAT_Mult_Test(void);
 

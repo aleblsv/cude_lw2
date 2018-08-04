@@ -164,6 +164,49 @@ void MAT_Sum(const Tp_fMat_TypeDef A, const Tp_fMat_TypeDef B, Tp_fMat_TypeDef C
     sdkDeleteTimer(&timer);
 }
 
+/**
+ *@brief Check device compute capability
+ *@param
+ *@retval None
+ */
+void MAT_Check_Device(void)
+{
+    int devID;
+    cudaError_t error;
+    cudaDeviceProp deviceProp;
+    error = cudaGetDevice(&devID);
+
+    if (error != cudaSuccess)
+    {
+        printf("cudaGetDevice returned error %s (code %d), line(%d)\n", cudaGetErrorString(error), error, __LINE__);
+    }
+
+    error = cudaGetDeviceProperties(&deviceProp, devID);
+
+    if (deviceProp.computeMode == cudaComputeModeProhibited)
+    {
+        fprintf(stderr,
+                "Error: device is running in <Compute Mode Prohibited>, no threads can use ::cudaSetDevice().\n");
+        exit(EXIT_SUCCESS);
+    }
+
+    if (error != cudaSuccess)
+    {
+        printf("cudaGetDeviceProperties returned error %s (code %d), line(%d)\n", cudaGetErrorString(error), error,
+               __LINE__);
+    }
+    else
+    {
+        printf("GPU Device %d: \"%s\" with compute capability %d.%d\n\n", devID, deviceProp.name, deviceProp.major,
+               deviceProp.minor);
+    }
+
+    // Use a larger block size for Fermi and above
+    int block_size = (deviceProp.major < 2) ? 16 : 32;
+
+    dim3 dimsA(5 * 2 * block_size, 5 * 2 * block_size, 1);
+    dim3 dimsB(5 * 4 * block_size, 5 * 2 * block_size, 1);
+}
 
 /**
  *@brief Print matrices value
@@ -200,6 +243,8 @@ void MAT_Mult_Test(void)
     Tp_fMat_TypeDef h_A;
     Tp_fMat_TypeDef h_B;
     Tp_fMat_TypeDef h_C;
+
+    MAT_Check_Device();
 
     h_A.Width = MAT_TEST_WIDTH;
     h_A.Height = MAT_TEST_HEIGHT;
