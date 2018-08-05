@@ -6,8 +6,10 @@
  */
 #include <stdio.h>
 
+#include "alg.h"
 #include "lw.h"
 #include "mat.h"
+#include "misc.h"
 
 /**
  *@brief  Main function
@@ -17,6 +19,8 @@
  */
 int main(int argc, char *argv[])
 {
+	MISC_Check_Device();
     //LW_Test_Min2();
-    MAT_Mult_Test();
+//    MAT_Mult_Test();
+    ALG_compDistFromEx_Test();
 }

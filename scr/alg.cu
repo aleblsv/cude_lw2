@@ -27,11 +27,13 @@ __global__ void ALG_compDistFromEx_Kernel(Tp_intVec_TypeDef Z_Vec, Tp_intVec_Typ
 {
     size_t row = blockIdx.y * blockDim.y + threadIdx.y;
     size_t col = blockIdx.x * blockDim.x + threadIdx.x;
+    float fval;
 
     if (row < D_Mat.Height && col < D_Mat.Width)
     {
         // ToDo: Change to distance between 2 points
-        MAT_SetElement(D_Mat, row, col, (Z_Vec.Elements[row] + U_Vec.Elements[col]));
+        fval  = (float) (Z_Vec.Elements[row] + U_Vec.Elements[col]);
+        MAT_SetElement(D_Mat, row, col, fval);
     }
 }
 

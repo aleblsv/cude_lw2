@@ -232,7 +232,6 @@ void MAT_Mult_Test(void)
     Tp_fMat_TypeDef h_B;
     Tp_fMat_TypeDef h_C;
 
-    MISC_Check_Device();
     tBl_Size = MISC_Get_Block_Size();
     Mat_Block_Size = tBl_Size.Bl_2d;
 
