@@ -42,11 +42,18 @@ __global__ void ALG_compDistFromEx_Kernel(Tp_intVec_TypeDef Z_Vec, Tp_intVec_Typ
  */
 void ALG_compDistFromEx_Launch(const Tp_intVec_TypeDef Z_Vec, const Tp_intVec_TypeDef U_Vec, Tp_fMat_TypeDef D_Mat)
 {
+    StopWatchInterface *timer = NULL;
+
     Tp_intVec_TypeDef d_Z_Vec;
     Tp_intVec_TypeDef d_U_Vec;
     Tp_fMat_TypeDef d_D_Mat;
     size_t Size;
     MISC_Bl_Size_TypeDef DimBlck = MISC_Get_Block_Size();
+
+    printf("\nGPU kernel compDistFromEx - Start\n");
+    sdkCreateTimer(&timer);
+    sdkResetTimer(&timer);
+    sdkStartTimer(&timer);
 
     d_Z_Vec = Z_Vec;
     Size = d_Z_Vec.Size * sizeof(int);
@@ -75,6 +82,10 @@ void ALG_compDistFromEx_Launch(const Tp_intVec_TypeDef Z_Vec, const Tp_intVec_Ty
     checkCudaErrors(cudaFree(d_Z_Vec.Elements));
     checkCudaErrors(cudaFree(d_U_Vec.Elements));
     checkCudaErrors(cudaFree(d_D_Mat.Elements));
+
+    sdkStopTimer(&timer);
+    printf("GPU kernel - Complete, time:%fms\n", sdkGetTimerValue(&timer));
+    sdkDeleteTimer(&timer);
 }
 
 /**
