@@ -35,6 +35,54 @@ __host__ __device__ void MAT_SetElement(Tp_fMat_TypeDef Mat, size_t row, size_t 
 }
 
 /**
+ *@brief  Set all matrix elements with value
+ *@param
+ *@retval None
+ */
+__host__ __device__ void MAT_SetElementAll(Tp_fMat_TypeDef Mat, float value)
+{
+    for (size_t i = 0; i < Mat.Height; i++)
+    {
+        for (size_t j = 0; j < Mat.Width; j++)
+        {
+            MAT_SetElement(Mat, i, j, value);
+        }
+    }
+}
+
+/**
+ *@brief Print matrix value
+ *@param
+ *@retval None
+ */
+__host__ __device__ void MAT_PrintMat(Tp_fMat_TypeDef Mat)
+{
+    for (size_t i = 0; i < Mat.Height; i++)
+    {
+        for (size_t j = 0; j < Mat.Width; j++)
+        {
+            printf("%.1f ", MAT_GetElement(Mat, i, j));
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
+
+/**
+ *@brief Print vector values
+ *@param
+ *@retval None
+ */
+__host__ __device__ void MAT_PrintVec(Tp_intVec_TypeDef Vec)
+{
+    for (size_t i = 0; i < Vec.Size; i++)
+    {
+        printf("%d ", Vec.Elements[i]);
+    }
+    printf("\n");
+}
+
+/**
  *@brief  GPU - kernel
  *@param
  *@retval None
@@ -151,7 +199,7 @@ void MAT_Sum(const Tp_fMat_TypeDef A, const Tp_fMat_TypeDef B, Tp_fMat_TypeDef C
     dim3 dimBlock(Mat_Block_Size, Mat_Block_Size);
     dim3 dimGrid((C.Width + dimBlock.x - 1) / dimBlock.x, (C.Height + dimBlock.y - 1) / dimBlock.y);
     MAT_SumKernel << < dimGrid, dimBlock >> > (d_A, d_B, d_C);
-	cudaDeviceSynchronize();
+    cudaDeviceSynchronize();
 
     checkCudaErrors(cudaMemcpy(C.Elements, d_C.Elements, Size, cudaMemcpyDeviceToHost));
 
@@ -163,24 +211,6 @@ void MAT_Sum(const Tp_fMat_TypeDef A, const Tp_fMat_TypeDef B, Tp_fMat_TypeDef C
     sdkStopTimer(&timer);
     printf("GPU kernel - Complete, time:%fms\n", sdkGetTimerValue(&timer));
     sdkDeleteTimer(&timer);
-}
-
-/**
- *@brief Print matrices value
- *@param
- *@retval None
- */
-void MAT_Print(Tp_fMat_TypeDef Mat)
-{
-    for (size_t i = 0; i < Mat.Height; i++)
-    {
-        for (size_t j = 0; j < Mat.Width; j++)
-        {
-            printf("%.1f ", MAT_GetElement(Mat, i, j));
-        }
-        printf("\n");
-    }
-    printf("\n");
 }
 
 #define MAT_TEST_WIDTH     4
@@ -219,12 +249,12 @@ void MAT_Mult_Test(void)
     h_C.Elements = C_Arr;
 
     MAT_SetElement(h_A, 0, 0, 1);
-	MAT_SetElement(h_A, 1, 1, 2);
+    MAT_SetElement(h_A, 1, 1, 2);
     MAT_SetElement(h_B, 0, 0, 3);
-	MAT_SetElement(h_B, 1, 1, 4);
+    MAT_SetElement(h_B, 1, 1, 4);
 
-    MAT_Print(h_A);
-    MAT_Print(h_B);
+    MAT_PrintMat(h_A);
+    MAT_PrintMat(h_B);
     MAT_Sum(h_A, h_B, h_C);
-    MAT_Print(h_C);
+    MAT_PrintMat(h_C);
 }

@@ -17,10 +17,12 @@
 /* Global function prototypes -----------------------------------------------*/
 __host__ __device__ float MAT_GetElement(const Tp_fMat_TypeDef Mat, size_t row, size_t col);
 __host__ __device__ void MAT_SetElement(Tp_fMat_TypeDef Mat, size_t row, size_t col, float value);
+__host__ __device__ void MAT_SetElementAll(Tp_fMat_TypeDef Mat, float value);
+__host__ __device__ void MAT_PrintMat(Tp_fMat_TypeDef Mat);
+__host__ __device__ void MAT_PrintVec(Tp_intVec_TypeDef Vec);
 
 void MAT_Mult(const Tp_fMat_TypeDef A, const Tp_fMat_TypeDef B, Tp_fMat_TypeDef C);
 void MAT_Sum(const Tp_fMat_TypeDef A, const Tp_fMat_TypeDef B, Tp_fMat_TypeDef C);
-void MAT_Print(Tp_fMat_TypeDef Mat);
 
 void MAT_Mult_Test(void);
 

@@ -2,6 +2,9 @@
 // Created by Alex on 3/7/2017.
 //
 
+#include <stdlib.h>
+#include <stdio.h>
+
 #include "alg.h"
 #include "config.h"
 #include "types.h"
@@ -27,7 +30,8 @@ __global__ void ALG_compDistFromEx_Kernel(Tp_intVec_TypeDef Z_Vec, Tp_intVec_Typ
 
     if (row < D_Mat.Height && col < D_Mat.Width)
     {
-        MAT_SetElement(D_Mat, row, col, (Z_Vec.Elements[row] + Z_Vec.Elements[col])); // ToDo: Change to distance between 2 points
+        // ToDo: Change to distance between 2 points
+        MAT_SetElement(D_Mat, row, col, (Z_Vec.Elements[row] + U_Vec.Elements[col]));
     }
 }
 
@@ -80,5 +84,32 @@ void ALG_compDistFromEx_Launch(const Tp_intVec_TypeDef Z_Vec, const Tp_intVec_Ty
  */
 void ALG_compDistFromEx_Test(void)
 {
-    
+    int z_arr[] = {1, 3, 4, 5, 7};
+    int u_arr[] = {8, 9, 10};
+    Tp_intVec_TypeDef h_Z_Vec;
+    Tp_intVec_TypeDef h_U_Vec;
+    Tp_fMat_TypeDef h_D_Mat;
+    size_t Size;
+
+    h_Z_Vec.Elements = z_arr;
+    h_Z_Vec.Size = sizeof(z_arr) / sizeof(z_arr[0]);
+    h_U_Vec.Elements = u_arr;
+    h_U_Vec.Size = sizeof(u_arr) / sizeof(u_arr[0]);
+
+    h_D_Mat.Height = h_Z_Vec.Size;
+    h_D_Mat.Width = h_U_Vec.Size;
+    Size = h_D_Mat.Height * h_D_Mat.Width * sizeof(float);
+    h_D_Mat.Elements = (float *) malloc(Size);
+    if (h_D_Mat.Elements == NULL)
+    {
+        printf("Can't allocate memory\n");
+        return;
+    }
+    MAT_SetElementAll(h_D_Mat, 0.0);
+    MAT_PrintVec(h_Z_Vec);
+    MAT_PrintVec(h_U_Vec);
+    MAT_PrintMat(h_D_Mat);
+    ALG_compDistFromEx_Launch(h_Z_Vec, h_U_Vec, h_D_Mat);
+    MAT_PrintMat(h_D_Mat);
+    free(h_D_Mat.Elements);
 }
