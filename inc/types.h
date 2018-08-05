@@ -30,6 +30,18 @@ typedef struct
     int *Elements;
 } Tp_intMat_TypeDef;
 
+typedef struct
+{
+    size_t Size;
+    float *Elements;
+} Tp_fVec_TypeDef;
+
+typedef struct
+{
+    size_t Size;
+    int *Elements;
+} Tp_intVec_TypeDef;
+
 /* Global Call back functions -----------------------------------------------*/
 /* Global function prototypes -----------------------------------------------*/
 
