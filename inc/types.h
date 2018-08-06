@@ -40,13 +40,13 @@ typedef struct
 typedef struct
 {
     size_t Size;
-    float *Elements;
+    float *pElements;
 } Tp_fVec_TypeDef;
 
 typedef struct
 {
     size_t Size;
-    int *Elements;
+    int *pElements;
 } Tp_intVec_TypeDef;
 
 typedef struct

@@ -77,7 +77,7 @@ __host__ __device__ void MAT_PrintVec(Tp_intVec_TypeDef Vec)
 {
     for (size_t i = 0; i < Vec.Size; i++)
     {
-        printf("%d ", Vec.Elements[i]);
+        printf("%d ", Vec.pElements[i]);
     }
     printf("\n");
 }

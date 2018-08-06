@@ -5,11 +5,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "alg_compDistFromEx.h"
-#include "types.h"
-#include "misc.h"
-#include "mat.h"
-#include "dist.h"
+#include "alg_initDnun.h"
+#include "max_min.h"
 
 /* Private define ------------------------------------------------------------*/
 /* Private typedef -----------------------------------------------------------*/
@@ -19,18 +16,24 @@
 /* ---------------------------------------------------------------------------*/
 
 /**
- *@brief  GPU - kernel, calculate distances of Z and U vectors building D matrix
+ *@brief  GPU - kernel,
  *@param
  *@retval None
  */
-__global__ void ALG_compDistFromEx_Kernel(Tp_intVec_TypeDef Z_Vec, Tp_intVec_TypeDef U_Vec, Tp_fMat_TypeDef D_Mat)
+__global__ void ALG_initDnun_Kernel(Tp_Z_Vec_TypeDef Z_Vec, Tp_fVec_TypeDef S_vec)
 {
-    size_t row = blockIdx.y * blockDim.y + threadIdx.y;
-    size_t col = blockIdx.x * blockDim.x + threadIdx.x;
+    size_t indx = blockIdx.x * blockDim.x + threadIdx.x;
 
-    if (row < D_Mat.Height && col < D_Mat.Width)
+    if (indx < Z_Vec.Size)
     {
-        MAT_SetElement(D_Mat, row, col, DIST_Calc(Z_Vec.pElements[row], U_Vec.pElements[col]));
+        S_vec.pElements[indx] = MAX_MIN_INF;
+        for (int i = 0; i < Z_Vec.Size; i++)
+        {
+            if(Z_Vec.pElements[indx].Label != Z_Vec.pElements[i].Label)
+            {
+
+            }
+        }
     }
 }
 
@@ -39,7 +42,7 @@ __global__ void ALG_compDistFromEx_Kernel(Tp_intVec_TypeDef Z_Vec, Tp_intVec_Typ
  *@param
  *@retval None
  */
-void ALG_compDistFromEx_Launch(const Tp_intVec_TypeDef Z_Vec, const Tp_intVec_TypeDef U_Vec, Tp_fMat_TypeDef D_Mat)
+void ALG_initDnun_Launch(const Tp_intVec_TypeDef Z_Vec, const Tp_intVec_TypeDef U_Vec, Tp_fMat_TypeDef D_Mat)
 {
     StopWatchInterface *timer = NULL;
 
@@ -92,7 +95,7 @@ void ALG_compDistFromEx_Launch(const Tp_intVec_TypeDef Z_Vec, const Tp_intVec_Ty
  *@param
  *@retval None
  */
-void ALG_compDistFromEx_Test(void)
+void ALG_initDnun_Test(void)
 {
     int z_arr[] = {1, 3, 4, 5, 7};
     int u_arr[] = {8, 9, 10};
