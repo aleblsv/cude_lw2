@@ -6,7 +6,6 @@
 #include <stdio.h>
 
 #include "alg.h"
-#include "config.h"
 #include "types.h"
 #include "misc.h"
 #include "mat.h"

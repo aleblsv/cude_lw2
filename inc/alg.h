@@ -7,6 +7,7 @@
 #ifndef _ALG_H
 #define _ALG_H
 
+#include "config.h"
 #include "types.h"
 
 /* Global define ------------------------------------------------------------*/
