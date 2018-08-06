@@ -5,10 +5,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "alg.h"
+#include "alg_compDistFromEx.h"
 #include "types.h"
 #include "misc.h"
 #include "mat.h"
+#include "dist.h"
 
 /* Private define ------------------------------------------------------------*/
 /* Private typedef -----------------------------------------------------------*/
@@ -16,17 +17,6 @@
 /* Private function prototypes -----------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* ---------------------------------------------------------------------------*/
-
-/**
- *@brief  GPU - kernel, calculate distance
- *@param
- *@retval None
- */
-__host__ __device__ float ALG_Dist(int v1, int v2)
-{
-    //ToDo: Need to change to distance function
-    return (float) (v1 + v2);
-}
 
 /**
  *@brief  GPU - kernel, calculate distances of Z and U vectors building D matrix
@@ -40,7 +30,7 @@ __global__ void ALG_compDistFromEx_Kernel(Tp_intVec_TypeDef Z_Vec, Tp_intVec_Typ
 
     if (row < D_Mat.Height && col < D_Mat.Width)
     {
-        MAT_SetElement(D_Mat, row, col, ALG_Dist(Z_Vec.Elements[row], U_Vec.Elements[col]));
+        MAT_SetElement(D_Mat, row, col, DIST_Calc(Z_Vec.Elements[row], U_Vec.Elements[col]));
     }
 }
 

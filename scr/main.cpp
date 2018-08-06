@@ -6,7 +6,7 @@
  */
 #include <stdio.h>
 
-#include "alg.h"
+#include "alg_compDistFromEx.h"
 #include "lw.h"
 #include "mat.h"
 #include "misc.h"
