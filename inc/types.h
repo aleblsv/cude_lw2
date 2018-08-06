@@ -12,6 +12,13 @@
 /* Global define ------------------------------------------------------------*/
 
 /* Global typedef -----------------------------------------------------------*/
+typedef struct
+{
+    int Size;
+    float *pFeature;  // Features
+    float Label;
+} Tp_Z_TypeDef;
+
 // Mat definition on Cuda device
 //             |y1,x1; y1,x2; y1,x3|
 // Mat(x, y):= |y2,x1; y2,x2; y2,x3|
@@ -41,6 +48,12 @@ typedef struct
     size_t Size;
     int *Elements;
 } Tp_intVec_TypeDef;
+
+typedef struct
+{
+    size_t Size;
+    Tp_Z_TypeDef *pElements;
+} Tp_Z_Vec_TypeDef;
 
 /* Global Call back functions -----------------------------------------------*/
 /* Global function prototypes -----------------------------------------------*/
