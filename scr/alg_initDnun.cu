@@ -31,7 +31,7 @@ __global__ void ALG_initDnun_Kernel(Tp_Z_Vec_TypeDef Z_Row, Tp_Z_Vec_TypeDef Z_C
     if (row < Z_Row.Size && col < Z_Col.Size)
     {
         MAT_SetElement(S_Mat, row, col, MAX_MIN_INF);
-        if(Z_Row.pElements[row].Label != Z_Col.pElements[col].Label)
+        if (Z_Row.pElements[row].Label != Z_Col.pElements[col].Label)
         {
             MAT_SetElement(S_Mat, row, col, DIST_Calc_Feat(Z_Row.pElements[row], Z_Col.pElements[col]));
         }
@@ -50,6 +50,7 @@ void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Vec, Tp_fVec_TypeDef dNUN_Vec)
     Tp_Z_Vec_TypeDef d_Z_Row;
     Tp_Z_Vec_TypeDef d_Z_Col;
     Tp_fMat_TypeDef d_S_Mat;
+    Tp_fMat_TypeDef h_S_Mat;
     Tp_fVec_TypeDef d_dNUN_Vec;
     size_t Size;
     MISC_Bl_Size_TypeDef DimBlck = MISC_Get_Block_Size();
@@ -73,6 +74,10 @@ void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Vec, Tp_fVec_TypeDef dNUN_Vec)
     d_S_Mat.Height = d_Z_Row.Size;
     Size = d_S_Mat.Width * d_S_Mat.Height * sizeof(float);
     checkCudaErrors(cudaMalloc(&d_S_Mat.pElements, Size));
+    h_S_Mat = d_S_Mat;
+    h_S_Mat.pElements = (float *) malloc(Size);
+    MAT_SetElementAll(h_S_Mat, 0.0);
+    MAT_PrintMat(h_S_Mat);
 
     // Invoke kernel
     dim3 dimBlock(DimBlck.Bl_2d, DimBlck.Bl_2d);
@@ -80,8 +85,10 @@ void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Vec, Tp_fVec_TypeDef dNUN_Vec)
     ALG_initDnun_Kernel << < dimGrid, dimBlock >> > (d_Z_Row, d_Z_Col, d_S_Mat);
     cudaDeviceSynchronize();
 
-//    MAT_PrintMat(d_S_Mat);
-    //ToDo:
+    checkCudaErrors(cudaMemcpy(h_S_Mat.pElements, d_S_Mat.pElements, Size, cudaMemcpyDeviceToHost));
+    MAT_PrintMat(h_S_Mat);
+    free(h_S_Mat.pElements);
+
 
 //    checkCudaErrors(cudaMemcpy(dNUN_Vec.pElements, d_dNUN_Vec.pElements, Size, cudaMemcpyDeviceToHost));
 
@@ -124,9 +131,9 @@ void ALG_initDnun_Test(void)
     for (int i = 0; i < Z_Vec.Size; i++)
     {
         printf("label:%d, is_proto:%d, num_of_features:%d ->\n[",
-                Z_Vec.pElements[i].Label,
-                Z_Vec.pElements[i].IsProto,
-                Z_Vec.pElements[i].Size);
+               Z_Vec.pElements[i].Label,
+               Z_Vec.pElements[i].IsProto,
+               Z_Vec.pElements[i].Size);
         for (int j = 0; j < Z_Vec.pElements[i].Size; j++)
         {
             printf("%.4f ", Z_Vec.pElements[i].pFeature[j]);
