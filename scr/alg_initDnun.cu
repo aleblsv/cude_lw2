@@ -77,7 +77,6 @@ void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Vec, Tp_fVec_TypeDef dNUN_Vec)
     h_S_Mat = d_S_Mat;
     h_S_Mat.pElements = (float *) malloc(Size);
     MAT_SetElementAll(h_S_Mat, 0.0);
-    MAT_PrintMat(h_S_Mat);
 
     // Invoke kernel
     dim3 dimBlock(DimBlck.Bl_2d, DimBlck.Bl_2d);
@@ -86,6 +85,7 @@ void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Vec, Tp_fVec_TypeDef dNUN_Vec)
     cudaDeviceSynchronize();
 
     checkCudaErrors(cudaMemcpy(h_S_Mat.pElements, d_S_Mat.pElements, Size, cudaMemcpyDeviceToHost));
+    printf("S matrix:\n");
     MAT_PrintMat(h_S_Mat);
     free(h_S_Mat.pElements);
 
@@ -127,13 +127,13 @@ void ALG_initDnun_Test(void)
 
     for (int i = 0; i < Z_Vec.Size; i++)
     {
-        printf("label:%d, is_proto:%d, num_of_features:%d ->\n[",
+        printf("label:%d, is_proto:%d, num_of_features:%d ->[",
                Z_Vec.pElements[i].Label,
                Z_Vec.pElements[i].IsProto,
                Z_Vec.pElements[i].Size);
         for (int j = 0; j < Z_Vec.pElements[i].Size; j++)
         {
-            printf("%.4f ", Z_Vec.pElements[i].Feature_Arr[j]);
+            printf("%.2f ", Z_Vec.pElements[i].Feature_Arr[j]);
         }
         printf("]\n");
     }
