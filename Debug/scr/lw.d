@@ -114,8 +114,7 @@ scr/lw.o : /home/alex/cuda-workspace/lw/scr/lw.cu \
     /usr/local/cuda-8.0/bin/..//include/texture_indirect_functions.h \
     /usr/local/cuda-8.0/bin/..//include/surface_indirect_functions.h \
     /usr/local/cuda-8.0/bin/..//include/device_launch_parameters.h \
-    /home/alex/cuda-workspace/lw/inc/lw.h \
-    /home/alex/cuda-workspace/lw/inc/jetbrains_ide.h \
+    /home/alex/cuda-workspace/lw/inc/config.h \
     /usr/local/cuda/samples/common/inc/helper_cuda.h \
     /usr/local/cuda/samples/common/inc/helper_string.h \
     /usr/include/c++/5.3.1/fstream \
@@ -214,5 +213,6 @@ scr/lw.o : /home/alex/cuda-workspace/lw/scr/lw.cu \
     /usr/include/c++/5.3.1/ctime \
     /usr/include/sys/time.h \
     /usr/local/cuda/samples/common/inc/helper_image.h \
-    /home/alex/cuda-workspace/lw/inc/max_min.h \
-    /home/alex/cuda-workspace/lw/inc/config.h
+    /home/alex/cuda-workspace/lw/inc/lw.h \
+    /home/alex/cuda-workspace/lw/inc/jetbrains_ide.h \
+    /home/alex/cuda-workspace/lw/inc/max_min.h
