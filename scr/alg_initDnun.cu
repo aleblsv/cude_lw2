@@ -43,7 +43,7 @@ __global__ void ALG_initDnun_Kernel(Tp_Z_Vec_TypeDef Z_Row, Tp_Z_Vec_TypeDef Z_C
  *@param
  *@retval None
  */
-void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Vec, Tp_fVec_TypeDef *pdNUN_Vec)
+void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Vec, Tp_fVec_TypeDef dNUN_Vec)
 {
     StopWatchInterface *timer = NULL;
 
@@ -54,7 +54,7 @@ void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Vec, Tp_fVec_TypeDef *pdNUN_Ve
     size_t Size;
     MISC_Bl_Size_TypeDef DimBlck = MISC_Get_Block_Size();
 
-    printf("\nGPU kernel compDistFromEx - Start\n");
+    printf("\nGPU kernel initDnun - Start\n");
     sdkCreateTimer(&timer);
     sdkResetTimer(&timer);
     sdkStartTimer(&timer);
@@ -83,7 +83,7 @@ void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Vec, Tp_fVec_TypeDef *pdNUN_Ve
     MAT_PrintMat(d_S_Mat);
     //ToDo:
 
-    checkCudaErrors(cudaMemcpy(pdNUN_Vec, d_dNUN_Vec, Size, cudaMemcpyDeviceToHost));
+//    checkCudaErrors(cudaMemcpy(dNUN_Vec.pElements, d_dNUN_Vec.pElements, Size, cudaMemcpyDeviceToHost));
 
 //    Free device memory
     checkCudaErrors(cudaFree(d_Z_Row.pElements));
@@ -106,24 +106,30 @@ void ALG_initDnun_Test(void)
     float feat1_arr[] = {2.0, 3.0};
     float feat2_arr[] = {1.0, 5.0};
     Tp_Z_TypeDef z_arr[] = {
-            {(sizeof(feat1_arr), feat1_arr, 1, 0)},
-            {(sizeof(feat2_arr), feat2_arr, 2, 0)}
+            {MISC_NUM_OF_ELEMENTS(feat1_arr), feat1_arr, 1, 0},
+            {MISC_NUM_OF_ELEMENTS(feat2_arr), feat2_arr, 2, 0}
     };
+    float dNUN_arr[MISC_NUM_OF_ELEMENTS(z_arr)];
     Tp_Z_Vec_TypeDef Z_Vec;
+    Tp_fVec_TypeDef dNUN;
 
-    Z_Vec.Size = sizeof(z_arr) / sizeof(z_arr[0]);
+    Z_Vec.Size = MISC_NUM_OF_ELEMENTS(z_arr);
     Z_Vec.pElements = z_arr;
 
-    if (h_D_Mat.pElements == NULL)
+    dNUN.Size = MISC_NUM_OF_ELEMENTS(z_arr);
+    dNUN.pElements = dNUN_arr;
+
+    for (int i = 0; i < Z_Vec.Size; i++)
     {
-        printf("Can't allocate memory\n");
-        return;
+        printf("label:%d, is_proto:%d, num_of_features:%d ->\n[",
+                Z_Vec.pElements[i].Label,
+                Z_Vec.pElements[i].IsProto,
+                Z_Vec.pElements[i].Size);
+        for (int j = 0; j < Z_Vec.pElements[i].Size; j++)
+        {
+            printf("%.4f ", Z_Vec.pElements[i].pFeature[j]);
+        }
+        printf("]\n");
     }
-    MAT_SetElementAll(h_D_Mat, 0.0);
-    MAT_PrintVec(h_Z_Vec);
-    MAT_PrintVec(h_U_Vec);
-    MAT_PrintMat(h_D_Mat);
-    ALG_compDistFromEx_Launch(h_Z_Vec, h_U_Vec, h_D_Mat);
-    MAT_PrintMat(h_D_Mat);
-    free(h_D_Mat.pElements);
+    ALG_initDnun_Launch(Z_Vec, dNUN);
 }

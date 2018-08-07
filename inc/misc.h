@@ -10,6 +10,7 @@
 #include <stdint.h>
 
 /* Global define ------------------------------------------------------------*/
+#define MISC_NUM_OF_ELEMENTS(X)           (sizeof(X) / sizeof(X[0]))
 /* Global typedef -----------------------------------------------------------*/
 typedef struct
 {
