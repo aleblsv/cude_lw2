@@ -34,8 +34,8 @@ __host__ __device__ float DIST_Calc_Feat(Tp_Z_TypeDef v1, Tp_Z_TypeDef v2)
     {
         for (int i = 0; i < v1.Size; i++)
         {
-            //val += pow((v1.pFeature[i] - v2.pFeature[i]), 2);
-        	val = v1.pFeature[i] + v2.pFeature[i];
+            //val += pow((v1.Feature_Arr[i] - v2.Feature_Arr[i]), 2);
+        	val = v1.Feature_Arr[i] + v2.Feature_Arr[i];
         }
 //        return sqrt(val);
         return val;

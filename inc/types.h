@@ -10,12 +10,12 @@
 #include "jetbrains_ide.h"
 
 /* Global define ------------------------------------------------------------*/
-
+#define TYPES_NUM_OF_FEATURES    2
 /* Global typedef -----------------------------------------------------------*/
 typedef struct
 {
     int Size;
-    float *pFeature;  // Features
+    float Feature_Arr[TYPES_NUM_OF_FEATURES];  // Features
     int Label;
     int IsProto;      // Is prototype
 } Tp_Z_TypeDef;

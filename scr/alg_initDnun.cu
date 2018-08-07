@@ -110,13 +110,10 @@ void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Vec, Tp_fVec_TypeDef dNUN_Vec)
  */
 void ALG_initDnun_Test(void)
 {
-    float feat1_arr[] = {2.0, 3.0};
-    float feat2_arr[] = {1.0, 5.0};
-    float feat3_arr[] = {7.0, 3.0};
     Tp_Z_TypeDef z_arr[] = {
-            {MISC_NUM_OF_ELEMENTS(feat1_arr), feat1_arr, 1, 0},
-            {MISC_NUM_OF_ELEMENTS(feat2_arr), feat2_arr, 1, 0},
-            {MISC_NUM_OF_ELEMENTS(feat3_arr), feat3_arr, 3, 0}
+            {TYPES_NUM_OF_FEATURES, {2.0, 3.0}, 1, 0},
+            {TYPES_NUM_OF_FEATURES, {1.0, 5.0}, 1, 0},
+            {TYPES_NUM_OF_FEATURES, {7.0, 3.0}, 3, 0}
     };
     float dNUN_arr[MISC_NUM_OF_ELEMENTS(z_arr)];
     Tp_Z_Vec_TypeDef Z_Vec;
@@ -136,7 +133,7 @@ void ALG_initDnun_Test(void)
                Z_Vec.pElements[i].Size);
         for (int j = 0; j < Z_Vec.pElements[i].Size; j++)
         {
-            printf("%.4f ", Z_Vec.pElements[i].pFeature[j]);
+            printf("%.4f ", Z_Vec.pElements[i].Feature_Arr[j]);
         }
         printf("]\n");
     }
