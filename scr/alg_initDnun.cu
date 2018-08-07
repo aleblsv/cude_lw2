@@ -9,6 +9,7 @@
 #include "max_min.h"
 #include "mat.h"
 #include "dist.h"
+#include "misc.h"
 
 /* Private define ------------------------------------------------------------*/
 /* Private typedef -----------------------------------------------------------*/
@@ -42,15 +43,14 @@ __global__ void ALG_initDnun_Kernel(Tp_Z_Vec_TypeDef Z_Row, Tp_Z_Vec_TypeDef Z_C
  *@param
  *@retval None
  */
-void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Row, const Tp_Z_Vec_TypeDef Z_Col, Tp_fVec_TypeDef *pdNUN_Vec)
+void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Vec, Tp_fVec_TypeDef *pdNUN_Vec)
 {
     StopWatchInterface *timer = NULL;
 
     Tp_Z_Vec_TypeDef d_Z_Row;
     Tp_Z_Vec_TypeDef d_Z_Col;
     Tp_fMat_TypeDef d_S_Mat;
-
-
+    Tp_fVec_TypeDef d_dNUN_Vec;
     size_t Size;
     MISC_Bl_Size_TypeDef DimBlck = MISC_Get_Block_Size();
 
@@ -59,33 +59,37 @@ void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Row, const Tp_Z_Vec_TypeDef Z_
     sdkResetTimer(&timer);
     sdkStartTimer(&timer);
 
-    d_Z_Vec = Z_Vec;
-    Size = d_Z_Vec.Size * sizeof(int);
-    checkCudaErrors(cudaMalloc(&d_Z_Vec.pElements, Size));
-    checkCudaErrors(cudaMemcpy(d_Z_Vec.pElements, Z_Vec.pElements, Size, cudaMemcpyHostToDevice));
+    d_Z_Row = Z_Vec;
+    Size = d_Z_Row.Size * sizeof(Tp_Z_TypeDef);
+    checkCudaErrors(cudaMalloc(&d_Z_Row.pElements, Size));
+    checkCudaErrors(cudaMemcpy(d_Z_Row.pElements, Z_Vec.pElements, Size, cudaMemcpyHostToDevice));
 
-    d_U_Vec = U_Vec;
-    Size = d_U_Vec.Size * sizeof(int);
-    checkCudaErrors(cudaMalloc(&d_U_Vec.pElements, Size));
-    checkCudaErrors(cudaMemcpy(d_U_Vec.pElements, U_Vec.pElements, Size, cudaMemcpyHostToDevice));
+    d_Z_Col = Z_Vec;
+    Size = d_Z_Row.Size * sizeof(Tp_Z_TypeDef);
+    checkCudaErrors(cudaMalloc(&d_Z_Row.pElements, Size));
+    checkCudaErrors(cudaMemcpy(d_Z_Row.pElements, Z_Vec.pElements, Size, cudaMemcpyHostToDevice));
 
-    d_D_Mat = D_Mat;
-    Size = d_D_Mat.Width * d_D_Mat.Height * sizeof(float);
-    checkCudaErrors(cudaMalloc(&d_D_Mat.Elements, Size));
-    checkCudaErrors(cudaMemcpy(d_D_Mat.Elements, D_Mat.Elements, Size, cudaMemcpyHostToDevice));
+    d_S_Mat.Width = d_Z_Col.Size;
+    d_S_Mat.Height = d_Z_Row.Size;
+    Size = d_S_Mat.Width * d_S_Mat.Height * sizeof(float);
+    checkCudaErrors(cudaMalloc(&d_S_Mat.pElements, Size));
 
     // Invoke kernel
     dim3 dimBlock(DimBlck.Bl_2d, DimBlck.Bl_2d);
-    dim3 dimGrid((d_D_Mat.Width + dimBlock.x - 1) / dimBlock.x, (d_D_Mat.Height + dimBlock.y - 1) / dimBlock.y);
-    ALG_compDistFromEx_Kernel << < dimGrid, dimBlock >> > (d_Z_Vec, d_U_Vec, d_D_Mat);
+    dim3 dimGrid((d_S_Mat.Width + dimBlock.x - 1) / dimBlock.x, (d_S_Mat.Height + dimBlock.y - 1) / dimBlock.y);
+    ALG_initDnun_Kernel << < dimGrid, dimBlock >> > (d_Z_Row, d_Z_Col, d_S_Mat);
     cudaDeviceSynchronize();
 
-    checkCudaErrors(cudaMemcpy(D_Mat.Elements, d_D_Mat.Elements, Size, cudaMemcpyDeviceToHost));
+    MAT_PrintMat(d_S_Mat);
+    //ToDo:
+
+    checkCudaErrors(cudaMemcpy(pdNUN_Vec, d_dNUN_Vec, Size, cudaMemcpyDeviceToHost));
 
 //    Free device memory
-    checkCudaErrors(cudaFree(d_Z_Vec.pElements));
-    checkCudaErrors(cudaFree(d_U_Vec.pElements));
-    checkCudaErrors(cudaFree(d_D_Mat.Elements));
+    checkCudaErrors(cudaFree(d_Z_Row.pElements));
+    checkCudaErrors(cudaFree(d_Z_Col.pElements));
+    checkCudaErrors(cudaFree(d_S_Mat.pElements));
+    checkCudaErrors(cudaFree(d_dNUN_Vec.pElements));
 
     sdkStopTimer(&timer);
     printf("GPU kernel - Complete, time:%fms\n", sdkGetTimerValue(&timer));
@@ -99,23 +103,18 @@ void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Row, const Tp_Z_Vec_TypeDef Z_
  */
 void ALG_initDnun_Test(void)
 {
-    int z_arr[] = {1, 3, 4, 5, 7};
-    int u_arr[] = {8, 9, 10};
-    Tp_intVec_TypeDef h_Z_Vec;
-    Tp_intVec_TypeDef h_U_Vec;
-    Tp_fMat_TypeDef h_D_Mat;
-    size_t Size;
+    float feat1_arr[] = {2.0, 3.0};
+    float feat2_arr[] = {1.0, 5.0};
+    Tp_Z_TypeDef z_arr[] = {
+            {(sizeof(feat1_arr), feat1_arr, 1, 0)},
+            {(sizeof(feat2_arr), feat2_arr, 2, 0)}
+    };
+    Tp_Z_Vec_TypeDef Z_Vec;
 
-    h_Z_Vec.pElements = z_arr;
-    h_Z_Vec.Size = sizeof(z_arr) / sizeof(z_arr[0]);
-    h_U_Vec.pElements = u_arr;
-    h_U_Vec.Size = sizeof(u_arr) / sizeof(u_arr[0]);
+    Z_Vec.Size = sizeof(z_arr) / sizeof(z_arr[0]);
+    Z_Vec.pElements = z_arr;
 
-    h_D_Mat.Height = h_Z_Vec.Size;
-    h_D_Mat.Width = h_U_Vec.Size;
-    Size = h_D_Mat.Height * h_D_Mat.Width * sizeof(float);
-    h_D_Mat.Elements = (float *) malloc(Size);
-    if (h_D_Mat.Elements == NULL)
+    if (h_D_Mat.pElements == NULL)
     {
         printf("Can't allocate memory\n");
         return;
@@ -126,5 +125,5 @@ void ALG_initDnun_Test(void)
     MAT_PrintMat(h_D_Mat);
     ALG_compDistFromEx_Launch(h_Z_Vec, h_U_Vec, h_D_Mat);
     MAT_PrintMat(h_D_Mat);
-    free(h_D_Mat.Elements);
+    free(h_D_Mat.pElements);
 }

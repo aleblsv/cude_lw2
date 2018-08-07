@@ -28,7 +28,7 @@ typedef struct
 {
     size_t Width;     // for col, x
     size_t Height;    // for row, y
-    float *Elements;
+    float *pElements;
 } Tp_fMat_TypeDef;
 
 typedef struct

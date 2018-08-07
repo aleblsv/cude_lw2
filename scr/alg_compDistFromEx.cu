@@ -66,8 +66,8 @@ void ALG_compDistFromEx_Launch(const Tp_intVec_TypeDef Z_Vec, const Tp_intVec_Ty
 
     d_D_Mat = D_Mat;
     Size = d_D_Mat.Width * d_D_Mat.Height * sizeof(float);
-    checkCudaErrors(cudaMalloc(&d_D_Mat.Elements, Size));
-    checkCudaErrors(cudaMemcpy(d_D_Mat.Elements, D_Mat.Elements, Size, cudaMemcpyHostToDevice));
+    checkCudaErrors(cudaMalloc(&d_D_Mat.pElements, Size));
+    checkCudaErrors(cudaMemcpy(d_D_Mat.pElements, D_Mat.pElements, Size, cudaMemcpyHostToDevice));
 
     // Invoke kernel
     dim3 dimBlock(DimBlck.Bl_2d, DimBlck.Bl_2d);
@@ -75,12 +75,12 @@ void ALG_compDistFromEx_Launch(const Tp_intVec_TypeDef Z_Vec, const Tp_intVec_Ty
     ALG_compDistFromEx_Kernel << < dimGrid, dimBlock >> > (d_Z_Vec, d_U_Vec, d_D_Mat);
     cudaDeviceSynchronize();
 
-    checkCudaErrors(cudaMemcpy(D_Mat.Elements, d_D_Mat.Elements, Size, cudaMemcpyDeviceToHost));
+    checkCudaErrors(cudaMemcpy(D_Mat.pElements, d_D_Mat.pElements, Size, cudaMemcpyDeviceToHost));
 
 //    Free device memory
     checkCudaErrors(cudaFree(d_Z_Vec.pElements));
     checkCudaErrors(cudaFree(d_U_Vec.pElements));
-    checkCudaErrors(cudaFree(d_D_Mat.Elements));
+    checkCudaErrors(cudaFree(d_D_Mat.pElements));
 
     sdkStopTimer(&timer);
     printf("GPU kernel - Complete, time:%fms\n", sdkGetTimerValue(&timer));
@@ -109,8 +109,8 @@ void ALG_compDistFromEx_Test(void)
     h_D_Mat.Height = h_Z_Vec.Size;
     h_D_Mat.Width = h_U_Vec.Size;
     Size = h_D_Mat.Height * h_D_Mat.Width * sizeof(float);
-    h_D_Mat.Elements = (float *) malloc(Size);
-    if (h_D_Mat.Elements == NULL)
+    h_D_Mat.pElements = (float *) malloc(Size);
+    if (h_D_Mat.pElements == NULL)
     {
         printf("Can't allocate memory\n");
         return;
@@ -121,5 +121,5 @@ void ALG_compDistFromEx_Test(void)
     MAT_PrintMat(h_D_Mat);
     ALG_compDistFromEx_Launch(h_Z_Vec, h_U_Vec, h_D_Mat);
     MAT_PrintMat(h_D_Mat);
-    free(h_D_Mat.Elements);
+    free(h_D_Mat.pElements);
 }

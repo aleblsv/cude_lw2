@@ -21,7 +21,7 @@ static int Mat_Block_Size = 16;
  */
 __host__ __device__ float MAT_GetElement(const Tp_fMat_TypeDef Mat, size_t row, size_t col)
 {
-    return Mat.Elements[row * Mat.Width + col];
+    return Mat.pElements[row * Mat.Width + col];
 }
 
 /**
@@ -31,7 +31,7 @@ __host__ __device__ float MAT_GetElement(const Tp_fMat_TypeDef Mat, size_t row, 
  */
 __host__ __device__ void MAT_SetElement(Tp_fMat_TypeDef Mat, size_t row, size_t col, float value)
 {
-    Mat.Elements[row * Mat.Width + col] = value;
+    Mat.pElements[row * Mat.Width + col] = value;
 }
 
 /**
@@ -135,17 +135,17 @@ void MAT_Mult(const Tp_fMat_TypeDef A, const Tp_fMat_TypeDef B, Tp_fMat_TypeDef 
 
     d_A = A;
     Size = A.Width * A.Height * sizeof(float);
-    checkCudaErrors(cudaMalloc(&d_A.Elements, Size));
-    checkCudaErrors(cudaMemcpy(d_A.Elements, A.Elements, Size, cudaMemcpyHostToDevice));
+    checkCudaErrors(cudaMalloc(&d_A.pElements, Size));
+    checkCudaErrors(cudaMemcpy(d_A.pElements, A.pElements, Size, cudaMemcpyHostToDevice));
 
     d_B = B;
     Size = B.Width * B.Height * sizeof(float);
-    checkCudaErrors(cudaMalloc(&d_B.Elements, Size));
-    checkCudaErrors(cudaMemcpy(d_B.Elements, B.Elements, Size, cudaMemcpyHostToDevice));
+    checkCudaErrors(cudaMalloc(&d_B.pElements, Size));
+    checkCudaErrors(cudaMemcpy(d_B.pElements, B.pElements, Size, cudaMemcpyHostToDevice));
 
     d_C = C;
     Size = C.Width * C.Height * sizeof(float);
-    checkCudaErrors(cudaMalloc(&d_C.Elements, Size));
+    checkCudaErrors(cudaMalloc(&d_C.pElements, Size));
 
     // Invoke kernel
     dim3 dimBlock(Mat_Block_Size, Mat_Block_Size);
@@ -153,12 +153,12 @@ void MAT_Mult(const Tp_fMat_TypeDef A, const Tp_fMat_TypeDef B, Tp_fMat_TypeDef 
     MAT_MulKernel << < dimGrid, dimBlock >> > (d_A, d_B, d_C);
     cudaDeviceSynchronize();
 
-    checkCudaErrors(cudaMemcpy(C.Elements, d_C.Elements, Size, cudaMemcpyDeviceToHost));
+    checkCudaErrors(cudaMemcpy(C.pElements, d_C.pElements, Size, cudaMemcpyDeviceToHost));
 
 //    Free device memory
-    checkCudaErrors(cudaFree(d_A.Elements));
-    checkCudaErrors(cudaFree(d_B.Elements));
-    checkCudaErrors(cudaFree(d_C.Elements));
+    checkCudaErrors(cudaFree(d_A.pElements));
+    checkCudaErrors(cudaFree(d_B.pElements));
+    checkCudaErrors(cudaFree(d_C.pElements));
 }
 
 
@@ -183,17 +183,17 @@ void MAT_Sum(const Tp_fMat_TypeDef A, const Tp_fMat_TypeDef B, Tp_fMat_TypeDef C
 
     d_A = A;
     Size = A.Width * A.Height * sizeof(float);
-    checkCudaErrors(cudaMalloc(&d_A.Elements, Size));
-    checkCudaErrors(cudaMemcpy(d_A.Elements, A.Elements, Size, cudaMemcpyHostToDevice));
+    checkCudaErrors(cudaMalloc(&d_A.pElements, Size));
+    checkCudaErrors(cudaMemcpy(d_A.pElements, A.pElements, Size, cudaMemcpyHostToDevice));
 
     d_B = B;
     Size = B.Width * B.Height * sizeof(float);
-    checkCudaErrors(cudaMalloc(&d_B.Elements, Size));
-    checkCudaErrors(cudaMemcpy(d_B.Elements, B.Elements, Size, cudaMemcpyHostToDevice));
+    checkCudaErrors(cudaMalloc(&d_B.pElements, Size));
+    checkCudaErrors(cudaMemcpy(d_B.pElements, B.pElements, Size, cudaMemcpyHostToDevice));
 
     d_C = C;
     Size = C.Width * C.Height * sizeof(float);
-    checkCudaErrors(cudaMalloc(&d_C.Elements, Size));
+    checkCudaErrors(cudaMalloc(&d_C.pElements, Size));
 
     // Invoke kernel
     dim3 dimBlock(Mat_Block_Size, Mat_Block_Size);
@@ -201,12 +201,12 @@ void MAT_Sum(const Tp_fMat_TypeDef A, const Tp_fMat_TypeDef B, Tp_fMat_TypeDef C
     MAT_SumKernel << < dimGrid, dimBlock >> > (d_A, d_B, d_C);
     cudaDeviceSynchronize();
 
-    checkCudaErrors(cudaMemcpy(C.Elements, d_C.Elements, Size, cudaMemcpyDeviceToHost));
+    checkCudaErrors(cudaMemcpy(C.pElements, d_C.pElements, Size, cudaMemcpyDeviceToHost));
 
 //    Free device memory
-    checkCudaErrors(cudaFree(d_A.Elements));
-    checkCudaErrors(cudaFree(d_B.Elements));
-    checkCudaErrors(cudaFree(d_C.Elements));
+    checkCudaErrors(cudaFree(d_A.pElements));
+    checkCudaErrors(cudaFree(d_B.pElements));
+    checkCudaErrors(cudaFree(d_C.pElements));
 
     sdkStopTimer(&timer);
     printf("GPU kernel - Complete, time:%fms\n", sdkGetTimerValue(&timer));
@@ -237,15 +237,15 @@ void MAT_Mult_Test(void)
 
     h_A.Width = MAT_TEST_WIDTH;
     h_A.Height = MAT_TEST_HEIGHT;
-    h_A.Elements = A_Arr;
+    h_A.pElements = A_Arr;
 
     h_B.Width = MAT_TEST_WIDTH;
     h_B.Height = MAT_TEST_HEIGHT;
-    h_B.Elements = B_Arr;
+    h_B.pElements = B_Arr;
 
     h_C.Width = MAT_TEST_WIDTH;
     h_C.Height = MAT_TEST_HEIGHT;
-    h_C.Elements = C_Arr;
+    h_C.pElements = C_Arr;
 
     MAT_SetElement(h_A, 0, 0, 1);
     MAT_SetElement(h_A, 1, 1, 2);

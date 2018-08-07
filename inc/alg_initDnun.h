@@ -15,5 +15,7 @@
 /* Global Call back functions -----------------------------------------------*/
 /* Global function prototypes -----------------------------------------------*/
 
+void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Vec, Tp_fVec_TypeDef *pdNUN_Vec);
+void ALG_initDnun_Test(void);
 
 #endif //ALG_INITDNUN_H
