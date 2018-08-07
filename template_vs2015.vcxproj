@@ -26,7 +26,9 @@
     <ClInclude Include="inc\types.h" />
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="scr\alg.cu" />
+    <CudaCompile Include="scr\alg_compDistFromEx.cu" />
+    <CudaCompile Include="scr\alg_initDnun.cu" />
+    <CudaCompile Include="scr\dist.cu" />
     <CudaCompile Include="scr\lw.cu" />
     <CudaCompile Include="scr\mat.cu" />
     <CudaCompile Include="scr\max_min.cu" />

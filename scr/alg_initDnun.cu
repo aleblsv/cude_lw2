@@ -65,9 +65,9 @@ void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Vec, Tp_fVec_TypeDef dNUN_Vec)
     checkCudaErrors(cudaMemcpy(d_Z_Row.pElements, Z_Vec.pElements, Size, cudaMemcpyHostToDevice));
 
     d_Z_Col = Z_Vec;
-    Size = d_Z_Row.Size * sizeof(Tp_Z_TypeDef);
-    checkCudaErrors(cudaMalloc(&d_Z_Row.pElements, Size));
-    checkCudaErrors(cudaMemcpy(d_Z_Row.pElements, Z_Vec.pElements, Size, cudaMemcpyHostToDevice));
+    Size = d_Z_Col.Size * sizeof(Tp_Z_TypeDef);
+    checkCudaErrors(cudaMalloc(&d_Z_Col.pElements, Size));
+    checkCudaErrors(cudaMemcpy(d_Z_Col.pElements, Z_Vec.pElements, Size, cudaMemcpyHostToDevice));
 
     d_S_Mat.Width = d_Z_Col.Size;
     d_S_Mat.Height = d_Z_Row.Size;
@@ -80,7 +80,7 @@ void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Vec, Tp_fVec_TypeDef dNUN_Vec)
     ALG_initDnun_Kernel << < dimGrid, dimBlock >> > (d_Z_Row, d_Z_Col, d_S_Mat);
     cudaDeviceSynchronize();
 
-    MAT_PrintMat(d_S_Mat);
+//    MAT_PrintMat(d_S_Mat);
     //ToDo:
 
 //    checkCudaErrors(cudaMemcpy(dNUN_Vec.pElements, d_dNUN_Vec.pElements, Size, cudaMemcpyDeviceToHost));
@@ -89,7 +89,7 @@ void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Vec, Tp_fVec_TypeDef dNUN_Vec)
     checkCudaErrors(cudaFree(d_Z_Row.pElements));
     checkCudaErrors(cudaFree(d_Z_Col.pElements));
     checkCudaErrors(cudaFree(d_S_Mat.pElements));
-    checkCudaErrors(cudaFree(d_dNUN_Vec.pElements));
+//    checkCudaErrors(cudaFree(d_dNUN_Vec.pElements));
 
     sdkStopTimer(&timer);
     printf("GPU kernel - Complete, time:%fms\n", sdkGetTimerValue(&timer));
@@ -105,9 +105,11 @@ void ALG_initDnun_Test(void)
 {
     float feat1_arr[] = {2.0, 3.0};
     float feat2_arr[] = {1.0, 5.0};
+    float feat3_arr[] = {7.0, 3.0};
     Tp_Z_TypeDef z_arr[] = {
             {MISC_NUM_OF_ELEMENTS(feat1_arr), feat1_arr, 1, 0},
-            {MISC_NUM_OF_ELEMENTS(feat2_arr), feat2_arr, 2, 0}
+            {MISC_NUM_OF_ELEMENTS(feat2_arr), feat2_arr, 1, 0},
+            {MISC_NUM_OF_ELEMENTS(feat3_arr), feat3_arr, 3, 0}
     };
     float dNUN_arr[MISC_NUM_OF_ELEMENTS(z_arr)];
     Tp_Z_Vec_TypeDef Z_Vec;

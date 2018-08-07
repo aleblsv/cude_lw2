@@ -7,6 +7,7 @@
 #include <stdio.h>
 
 #include "alg_compDistFromEx.h"
+#include "alg_initDnun.h"
 #include "lw.h"
 #include "mat.h"
 #include "misc.h"
@@ -22,5 +23,6 @@ int main(int argc, char *argv[])
 	MISC_Check_Device();
     //LW_Test_Min2();
 //    MAT_Mult_Test();
-    ALG_compDistFromEx_Test();
+//    ALG_compDistFromEx_Test();
+    ALG_initDnun_Test();
 }
