@@ -15,5 +15,6 @@
 /* Global Call back functions -----------------------------------------------*/
 /* Global function prototypes -----------------------------------------------*/
 __host__ __device__ float DIST_Calc(int v1, int v2);
+__host__ __device__ float DIST_Calc_Feat(Tp_Z_TypeDef v1, Tp_Z_TypeDef v2);
 
 #endif //DIST_H

@@ -16,7 +16,8 @@ typedef struct
 {
     int Size;
     float *pFeature;  // Features
-    float Label;
+    int Label;
+    int IsProto;      // Is prototype
 } Tp_Z_TypeDef;
 
 // Mat definition on Cuda device

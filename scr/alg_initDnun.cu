@@ -7,6 +7,8 @@
 
 #include "alg_initDnun.h"
 #include "max_min.h"
+#include "mat.h"
+#include "dist.h"
 
 /* Private define ------------------------------------------------------------*/
 /* Private typedef -----------------------------------------------------------*/
@@ -20,19 +22,17 @@
  *@param
  *@retval None
  */
-__global__ void ALG_initDnun_Kernel(Tp_Z_Vec_TypeDef Z_Vec, Tp_fVec_TypeDef S_vec)
+__global__ void ALG_initDnun_Kernel(Tp_Z_Vec_TypeDef Z_Row, Tp_Z_Vec_TypeDef Z_Col, Tp_fMat_TypeDef S_Mat)
 {
-    size_t indx = blockIdx.x * blockDim.x + threadIdx.x;
+    size_t row = blockIdx.y * blockDim.y + threadIdx.y;
+    size_t col = blockIdx.x * blockDim.x + threadIdx.x;
 
-    if (indx < Z_Vec.Size)
+    if (row < Z_Row.Size && col < Z_Col.Size)
     {
-        S_vec.pElements[indx] = MAX_MIN_INF;
-        for (int i = 0; i < Z_Vec.Size; i++)
+        MAT_SetElement(S_Mat, row, col, MAX_MIN_INF);
+        if(Z_Row.pElements[row].Label != Z_Col.pElements[col].Label)
         {
-            if(Z_Vec.pElements[indx].Label != Z_Vec.pElements[i].Label)
-            {
-
-            }
+            MAT_SetElement(S_Mat, row, col, DIST_Calc_Feat(Z_Row.pElements[row], Z_Col.pElements[col]));
         }
     }
 }
@@ -42,13 +42,15 @@ __global__ void ALG_initDnun_Kernel(Tp_Z_Vec_TypeDef Z_Vec, Tp_fVec_TypeDef S_ve
  *@param
  *@retval None
  */
-void ALG_initDnun_Launch(const Tp_intVec_TypeDef Z_Vec, const Tp_intVec_TypeDef U_Vec, Tp_fMat_TypeDef D_Mat)
+void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Row, const Tp_Z_Vec_TypeDef Z_Col, Tp_fVec_TypeDef *pdNUN_Vec)
 {
     StopWatchInterface *timer = NULL;
 
-    Tp_intVec_TypeDef d_Z_Vec;
-    Tp_intVec_TypeDef d_U_Vec;
-    Tp_fMat_TypeDef d_D_Mat;
+    Tp_Z_Vec_TypeDef d_Z_Row;
+    Tp_Z_Vec_TypeDef d_Z_Col;
+    Tp_fMat_TypeDef d_S_Mat;
+
+
     size_t Size;
     MISC_Bl_Size_TypeDef DimBlck = MISC_Get_Block_Size();
 
