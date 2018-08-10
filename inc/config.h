@@ -19,8 +19,8 @@
 /* Global define ------------------------------------------------------------*/
 
 #define CONFIG_SHARED_MEM_MAX_SIZE         48000  // For Device 3.5
-//#define CONFIG_THREADS_PER_BLOCK           1024   // For Device 3.5
-#define CONFIG_THREADS_PER_BLOCK           128   //
+#define CONFIG_THREADS_PER_BLOCK_1D        1024
+#define CONFIG_THREADS_PER_BLOCK_2D        32
 
 /* Global typedef -----------------------------------------------------------*/
 /* Global Call back functions -----------------------------------------------*/

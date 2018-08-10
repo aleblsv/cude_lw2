@@ -11,6 +11,7 @@
 #include "lw.h"
 #include "mat.h"
 #include "misc.h"
+#include "max_min.h"
 
 /**
  *@brief  Main function

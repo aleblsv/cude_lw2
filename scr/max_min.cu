@@ -7,14 +7,15 @@
 
 #include "config.h"
 #include "max_min.h"
+#include "misc.h"
 
 /* Private define ------------------------------------------------------------*/
 /* Private typedef -----------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-
 /* ---------------------------------------------------------------------------*/
+
 
 /**
  *@brief  Find maximum in array,  GPU - kernel
@@ -27,7 +28,7 @@ __global__ void find_maximum_kernel(float *array, float *max, int *mutex, unsign
     unsigned int stride = gridDim.x * blockDim.x;
     unsigned int offset = 0;
 
-    __shared__ float cache[CONFIG_THREADS_PER_BLOCK];
+    __shared__ float cache[CONFIG_THREADS_PER_BLOCK_1D];
 
 
     float temp = -MAX_MIN_INF;
@@ -75,8 +76,8 @@ __global__ void find_maximum_index_kernel(float *array, float *max, int *maxInde
     unsigned int index = threadIdx.x + blockIdx.x * blockDim.x;
     unsigned int stride = gridDim.x * blockDim.x;
     unsigned int offset = 0;
-    __shared__ float cache[CONFIG_THREADS_PER_BLOCK];
-    __shared__ int indexCache[CONFIG_THREADS_PER_BLOCK];
+    __shared__ float cache[CONFIG_THREADS_PER_BLOCK_1D];
+    __shared__ int indexCache[CONFIG_THREADS_PER_BLOCK_1D];
 
     float temp = -1.0;
     int tempIndex = 0;
@@ -132,7 +133,56 @@ __global__ void find_minimum_kernel(float *array, float *min, int *mutex, unsign
     unsigned int stride = gridDim.x * blockDim.x;
     unsigned int offset = 0;
 
-    __shared__ float cache[CONFIG_THREADS_PER_BLOCK];
+    __shared__ float cache[CONFIG_THREADS_PER_BLOCK_1D];
+
+
+    float temp = MAX_MIN_INF;
+    while (index + offset < n)
+    {
+        temp = fminf(temp, array[index + offset]);
+
+        offset += stride;
+    }
+
+    cache[threadIdx.x] = temp;
+
+    __syncthreads();
+
+
+    // reduction
+    unsigned int i = blockDim.x / 2;
+    while (i != 0)
+    {
+        if (threadIdx.x < i)
+        {
+            cache[threadIdx.x] = fminf(cache[threadIdx.x], cache[threadIdx.x + i]);
+        }
+
+        __syncthreads();
+        i /= 2;
+    }
+
+    if (threadIdx.x == 0)
+    {
+        while (atomicCAS(mutex, 0, 1) != 0);  //lock
+//        *min = fminf(*min, cache[0]);
+        *min = cache[0];
+        atomicExch(mutex, 0);  //unlock
+    }
+}
+
+/**
+ *@brief  Find minimum in array of 2d mamtrix, device function
+ *@param
+ *@retval None
+ */
+__device__ void MAX_MIN_minimum_vector_of_2DMat(float *array, float *min, int *mutex, unsigned int n)
+{
+    unsigned int index = threadIdx.x + blockIdx.x * blockDim.x;
+    unsigned int stride = gridDim.x * blockDim.x;
+    unsigned int offset = 0;
+
+    __shared__ float cache[CONFIG_THREADS_PER_BLOCK_2D];
 
 
     float temp = MAX_MIN_INF;
@@ -180,8 +230,8 @@ __global__ void find_minimum_index_kernel(float *array, float *min, int *minInde
     unsigned int index = threadIdx.x + blockIdx.x * blockDim.x;
     unsigned int stride = gridDim.x * blockDim.x;
     unsigned int offset = 0;
-    __shared__ float cache[CONFIG_THREADS_PER_BLOCK];
-    __shared__ int indexCache[CONFIG_THREADS_PER_BLOCK];
+    __shared__ float cache[CONFIG_THREADS_PER_BLOCK_1D];
+    __shared__ int indexCache[CONFIG_THREADS_PER_BLOCK_1D];
 
     float temp = MAX_MIN_INF;
     int tempIndex = 0;

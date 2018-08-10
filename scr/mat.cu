@@ -51,6 +51,16 @@ __host__ __device__ void MAT_SetElementAll(Tp_fMat_TypeDef Mat, float value)
 }
 
 /**
+ *@brief  Get a row vector
+ *@param
+ *@retval None
+ */
+__host__ __device__ float *MAT_GetRow_Vec(const Tp_fMat_TypeDef Mat, size_t row)
+{
+    return &Mat.pElements[row * Mat.Width + 0];
+}
+
+/**
  *@brief Print matrix value
  *@param
  *@retval None

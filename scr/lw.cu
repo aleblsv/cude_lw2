@@ -82,7 +82,7 @@ static void _LW_Launch_Min2(float *pV, int *pPsy, int m_len, int *pU, int M_len,
     checkCudaErrors(cudaMemcpy(pU_d, pU, M_len * sizeof(int), cudaMemcpyHostToDevice));
     checkCudaErrors(cudaMemset(d_mutex, 0, sizeof(int)));
 
-    int threadsPerBlock = CONFIG_THREADS_PER_BLOCK;
+    int threadsPerBlock = CONFIG_THREADS_PER_BLOCK_1D;
     int blocksPerGrid = (m_len + threadsPerBlock - 1) / threadsPerBlock;
     // launch kernel
     LW_Kernel_Min2 << < blocksPerGrid, threadsPerBlock >> >
