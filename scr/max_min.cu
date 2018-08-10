@@ -223,7 +223,7 @@ static __device__ void _MAX_MIN_min_vec_2DMat(float *array, float *min, int *mut
 }
 
 /**
- *@brief  Find minimum in array of 2d mamtrix, GPU kernel
+ *@brief  Find minimum in array of 2d matrix, GPU kernel
  *@param
  *@retval None
  */

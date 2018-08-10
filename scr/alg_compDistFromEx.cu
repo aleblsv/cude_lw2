@@ -116,8 +116,8 @@ void ALG_compDistFromEx_Test(void)
         return;
     }
     MAT_SetElementAll(h_D_Mat, 0.0);
-    MAT_PrintVec(h_Z_Vec);
-    MAT_PrintVec(h_U_Vec);
+    MAT_PrintVecInt(h_Z_Vec);
+    MAT_PrintVecInt(h_U_Vec);
     MAT_PrintMat(h_D_Mat);
     ALG_compDistFromEx_Launch(h_Z_Vec, h_U_Vec, h_D_Mat);
     MAT_PrintMat(h_D_Mat);

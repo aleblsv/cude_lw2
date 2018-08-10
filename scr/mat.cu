@@ -83,11 +83,24 @@ __host__ __device__ void MAT_PrintMat(Tp_fMat_TypeDef Mat)
  *@param
  *@retval None
  */
-__host__ __device__ void MAT_PrintVec(Tp_intVec_TypeDef Vec)
+__host__ __device__ void MAT_PrintVecInt(Tp_intVec_TypeDef Vec)
 {
     for (size_t i = 0; i < Vec.Size; i++)
     {
         printf("%d ", Vec.pElements[i]);
+    }
+    printf("\n");
+}
+/**
+ *@brief Print vector values
+ *@param
+ *@retval None
+ */
+__host__ __device__ void MAT_PrintVecFloat(Tp_fVec_TypeDef Vec)
+{
+    for (size_t i = 0; i < Vec.Size; i++)
+    {
+        printf("%.2f ", Vec.pElements[i]);
     }
     printf("\n");
 }

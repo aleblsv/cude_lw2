@@ -89,12 +89,23 @@ void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Vec, Tp_fVec_TypeDef dNUN_Vec)
     ALG_initDnun_Kernel << < dimGrid, dimBlock >> > (d_Z_Row, d_Z_Col, d_S_Mat);
     cudaDeviceSynchronize();
     MAX_MIN_min_vec_2DMat_kernel << < dimGrid, dimBlock >> > (d_S_Mat, d_dNUN_Vec);
+    cudaDeviceSynchronize();
 
     checkCudaErrors(cudaMemcpy(h_S_Mat.pElements, d_S_Mat.pElements, Size, cudaMemcpyDeviceToHost));
     checkCudaErrors(cudaMemcpy(dNUN_Vec.pElements, d_dNUN_Vec.pElements, d_dNUN_Vec.Size * sizeof(float),
                                cudaMemcpyDeviceToHost));
     printf("S matrix:\n");
     MAT_PrintMat(h_S_Mat);
+//
+//    printf("S matrix print by vec:\n");
+//    Tp_fVec_TypeDef tVec;
+//    for (int i = 0; i < h_S_Mat.Height; ++i)
+//    {
+//        tVec.pElements = MAT_GetRow_Vec(h_S_Mat, i);
+//        tVec.Size = h_S_Mat.Width;
+//        MAT_PrintVecFloat(tVec);
+//    }
+
     free(h_S_Mat.pElements);
 
 //    Free device memory
@@ -144,7 +155,6 @@ void ALG_initDnun_Test(void)
     }
     ALG_initDnun_Launch(Z_Vec, dNUN);
 
-    printf("dNUN=>[");
-    MAT_PrintVec(dNUN);
-    printf("]\n");
+    printf("dNUN=");
+    MAT_PrintVecFloat(dNUN);
 }

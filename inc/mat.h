@@ -20,7 +20,8 @@ __host__ __device__ void MAT_SetElement(Tp_fMat_TypeDef Mat, size_t row, size_t 
 __host__ __device__ void MAT_SetElementAll(Tp_fMat_TypeDef Mat, float value);
 __host__ __device__ float *MAT_GetRow_Vec(const Tp_fMat_TypeDef Mat, size_t row);
 __host__ __device__ void MAT_PrintMat(Tp_fMat_TypeDef Mat);
-__host__ __device__ void MAT_PrintVec(Tp_intVec_TypeDef Vec);
+__host__ __device__ void MAT_PrintVecInt(Tp_intVec_TypeDef Vec);
+__host__ __device__ void MAT_PrintVecFloat(Tp_fVec_TypeDef Vec);
 
 void MAT_Mult(const Tp_fMat_TypeDef A, const Tp_fMat_TypeDef B, Tp_fMat_TypeDef C);
 void MAT_Sum(const Tp_fMat_TypeDef A, const Tp_fMat_TypeDef B, Tp_fMat_TypeDef C);
