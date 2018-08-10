@@ -50,8 +50,9 @@ void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Vec, Tp_fVec_TypeDef dNUN_Vec)
     Tp_Z_Vec_TypeDef d_Z_Row;
     Tp_Z_Vec_TypeDef d_Z_Col;
     Tp_fMat_TypeDef d_S_Mat;
-    Tp_fMat_TypeDef h_S_Mat;
     Tp_fVec_TypeDef d_dNUN_Vec;
+
+    Tp_fMat_TypeDef h_S_Mat;
     size_t Size;
     MISC_Bl_Size_TypeDef DimBlck = MISC_Get_Block_Size();
 
@@ -70,6 +71,10 @@ void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Vec, Tp_fVec_TypeDef dNUN_Vec)
     checkCudaErrors(cudaMalloc(&d_Z_Col.pElements, Size));
     checkCudaErrors(cudaMemcpy(d_Z_Col.pElements, Z_Vec.pElements, Size, cudaMemcpyHostToDevice));
 
+    d_dNUN_Vec = dNUN_Vec;
+    Size = d_dNUN_Vec.Size * sizeof(float);
+    checkCudaErrors(cudaMalloc(&d_dNUN_Vec.pElements, Size));
+
     d_S_Mat.Width = d_Z_Col.Size;
     d_S_Mat.Height = d_Z_Row.Size;
     Size = d_S_Mat.Width * d_S_Mat.Height * sizeof(float);
@@ -83,20 +88,20 @@ void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Vec, Tp_fVec_TypeDef dNUN_Vec)
     dim3 dimGrid((d_S_Mat.Width + dimBlock.x - 1) / dimBlock.x, (d_S_Mat.Height + dimBlock.y - 1) / dimBlock.y);
     ALG_initDnun_Kernel << < dimGrid, dimBlock >> > (d_Z_Row, d_Z_Col, d_S_Mat);
     cudaDeviceSynchronize();
+    MAX_MIN_min_vec_2DMat_kernel << < dimGrid, dimBlock >> > (d_S_Mat, d_dNUN_Vec);
 
     checkCudaErrors(cudaMemcpy(h_S_Mat.pElements, d_S_Mat.pElements, Size, cudaMemcpyDeviceToHost));
+    checkCudaErrors(cudaMemcpy(dNUN_Vec.pElements, d_dNUN_Vec.pElements, d_dNUN_Vec.Size * sizeof(float),
+                               cudaMemcpyDeviceToHost));
     printf("S matrix:\n");
     MAT_PrintMat(h_S_Mat);
     free(h_S_Mat.pElements);
-
-
-//    checkCudaErrors(cudaMemcpy(dNUN_Vec.pElements, d_dNUN_Vec.pElements, Size, cudaMemcpyDeviceToHost));
 
 //    Free device memory
     checkCudaErrors(cudaFree(d_Z_Row.pElements));
     checkCudaErrors(cudaFree(d_Z_Col.pElements));
     checkCudaErrors(cudaFree(d_S_Mat.pElements));
-//    checkCudaErrors(cudaFree(d_dNUN_Vec.pElements));
+    checkCudaErrors(cudaFree(d_dNUN_Vec.pElements));
 
     sdkStopTimer(&timer);
     printf("GPU kernel - Complete, time:%fms\n", sdkGetTimerValue(&timer));
@@ -138,4 +143,8 @@ void ALG_initDnun_Test(void)
         printf("]\n");
     }
     ALG_initDnun_Launch(Z_Vec, dNUN);
+
+    printf("dNUN=>[");
+    MAT_PrintVec(dNUN);
+    printf("]\n");
 }

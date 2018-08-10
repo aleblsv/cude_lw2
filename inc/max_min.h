@@ -20,6 +20,6 @@ __global__ void find_maximum_kernel(float *array, float *max, int *mutex, unsign
 __global__ void find_maximum_index_kernel(float *array, float *max, int *maxIndex, int *mutex, unsigned int n);
 __global__ void find_minimum_kernel(float *array, float *min, int *mutex, unsigned int n);
 __global__ void find_minimum_index_kernel(float *array, float *min, int *minIndex, int *mutex, unsigned int n);
+__global__ void MAX_MIN_min_vec_2DMat_kernel(Tp_fMat_TypeDef MatIn, Tp_fVec_TypeDef VecOut);
 
-__device__ void MAX_MIN_minimum_vector_of_2DMat(float *array, float *min, int *mutex, unsigned int n);
 #endif //MAX_MIN_H

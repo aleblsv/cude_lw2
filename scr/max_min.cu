@@ -5,14 +5,17 @@
 //
 //
 
+#include <types.h>
 #include "config.h"
 #include "max_min.h"
 #include "misc.h"
+#include "mat.h"
 
 /* Private define ------------------------------------------------------------*/
 /* Private typedef -----------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
+static __device__ void _MAX_MIN_min_vec_2DMat(float *array, float *min, int *mutex, unsigned int n);
 /* Private variables ---------------------------------------------------------*/
 /* ---------------------------------------------------------------------------*/
 
@@ -176,7 +179,7 @@ __global__ void find_minimum_kernel(float *array, float *min, int *mutex, unsign
  *@param
  *@retval None
  */
-__device__ void MAX_MIN_minimum_vector_of_2DMat(float *array, float *min, int *mutex, unsigned int n)
+static __device__ void _MAX_MIN_min_vec_2DMat(float *array, float *min, int *mutex, unsigned int n)
 {
     unsigned int index = threadIdx.x + blockIdx.x * blockDim.x;
     unsigned int stride = gridDim.x * blockDim.x;
@@ -214,9 +217,24 @@ __device__ void MAX_MIN_minimum_vector_of_2DMat(float *array, float *min, int *m
     if (threadIdx.x == 0)
     {
         while (atomicCAS(mutex, 0, 1) != 0);  //lock
-//        *min = fminf(*min, cache[0]);
         *min = cache[0];
         atomicExch(mutex, 0);  //unlock
+    }
+}
+
+/**
+ *@brief  Find minimum in array of 2d mamtrix, GPU kernel
+ *@param
+ *@retval None
+ */
+__global__ void MAX_MIN_min_vec_2DMat_kernel(Tp_fMat_TypeDef MatIn, Tp_fVec_TypeDef VecOut)
+{
+    size_t row = blockIdx.y * blockDim.y + threadIdx.y;
+    int mutex;
+
+    if (row < MatIn.Height)
+    {
+        _MAX_MIN_min_vec_2DMat(MAT_GetRow_Vec(MatIn, row), &VecOut.pElements[row], &mutex, MatIn.Width);
     }
 }
 
