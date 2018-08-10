@@ -51,6 +51,7 @@ void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Vec, Tp_fVec_TypeDef dNUN_Vec)
     Tp_Z_Vec_TypeDef d_Z_Col;
     Tp_fMat_TypeDef d_S_Mat;
     Tp_fVec_TypeDef d_dNUN_Vec;
+    int *d_mutex;
 
     Tp_fMat_TypeDef h_S_Mat;
     size_t Size;
@@ -60,6 +61,8 @@ void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Vec, Tp_fVec_TypeDef dNUN_Vec)
     sdkCreateTimer(&timer);
     sdkResetTimer(&timer);
     sdkStartTimer(&timer);
+
+    checkCudaErrors(cudaMalloc(&d_mutex, sizeof(int)));
 
     d_Z_Row = Z_Vec;
     Size = d_Z_Row.Size * sizeof(Tp_Z_TypeDef);
@@ -88,7 +91,7 @@ void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Vec, Tp_fVec_TypeDef dNUN_Vec)
     dim3 dimGrid((d_S_Mat.Width + dimBlock.x - 1) / dimBlock.x, (d_S_Mat.Height + dimBlock.y - 1) / dimBlock.y);
     ALG_initDnun_Kernel << < dimGrid, dimBlock >> > (d_Z_Row, d_Z_Col, d_S_Mat);
     cudaDeviceSynchronize();
-    MAX_MIN_min_vec_2DMat_kernel << < dimGrid, dimBlock >> > (d_S_Mat, d_dNUN_Vec);
+    MAX_MIN_min_vec_2DMat_kernel << < dimGrid, dimBlock >> > (d_S_Mat, d_dNUN_Vec, d_mutex);
     cudaDeviceSynchronize();
 
     checkCudaErrors(cudaMemcpy(h_S_Mat.pElements, d_S_Mat.pElements, Size, cudaMemcpyDeviceToHost));
@@ -113,6 +116,7 @@ void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Vec, Tp_fVec_TypeDef dNUN_Vec)
     checkCudaErrors(cudaFree(d_Z_Col.pElements));
     checkCudaErrors(cudaFree(d_S_Mat.pElements));
     checkCudaErrors(cudaFree(d_dNUN_Vec.pElements));
+    checkCudaErrors(cudaFree(d_mutex));
 
     sdkStopTimer(&timer);
     printf("GPU kernel - Complete, time:%fms\n", sdkGetTimerValue(&timer));

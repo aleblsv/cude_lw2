@@ -227,14 +227,13 @@ static __device__ void _MAX_MIN_min_vec_2DMat(float *array, float *min, int *mut
  *@param
  *@retval None
  */
-__global__ void MAX_MIN_min_vec_2DMat_kernel(Tp_fMat_TypeDef MatIn, Tp_fVec_TypeDef VecOut)
+__global__ void MAX_MIN_min_vec_2DMat_kernel(Tp_fMat_TypeDef MatIn, Tp_fVec_TypeDef VecOut, int *mutex)
 {
     size_t row = blockIdx.y * blockDim.y + threadIdx.y;
-    int mutex;
 
     if (row < MatIn.Height)
     {
-        _MAX_MIN_min_vec_2DMat(MAT_GetRow_Vec(MatIn, row), &VecOut.pElements[row], &mutex, MatIn.Width);
+        _MAX_MIN_min_vec_2DMat(MAT_GetRow_Vec(MatIn, row), &VecOut.pElements[row], mutex, MatIn.Width);
     }
 }
 
