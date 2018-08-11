@@ -16,5 +16,6 @@ add_executable(cude_lw2
         scr/misc.cu
         scr/alg_compDistFromEx.cu
         scr/alg_initDnun.cu
+        scr/alg_CompV.cu
         scr/dist.cu
-        inc/jetbrains_ide.h inc/max_min.h inc/config.h inc/types.h inc/mat.h inc/misc.h inc/alg_compDistFromEx.h inc/dist.h inc/alg_initDnun.h)
+        inc/jetbrains_ide.h inc/max_min.h inc/config.h inc/types.h inc/mat.h inc/misc.h inc/alg_compDistFromEx.h inc/dist.h inc/alg_initDnun.h inc/alg_CompV.h)
