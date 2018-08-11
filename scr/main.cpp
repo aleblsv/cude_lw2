@@ -8,6 +8,7 @@
 
 #include "alg_compDistFromEx.h"
 #include "alg_initDnun.h"
+#include "alg_CompV.h"
 #include "lw.h"
 #include "mat.h"
 #include "misc.h"
@@ -25,5 +26,6 @@ int main(int argc, char *argv[])
     //LW_Test_Min2();
 //    MAT_Mult_Test();
 //    ALG_compDistFromEx_Test();
-    ALG_initDnun_Test();
+//    ALG_initDnun_Test();
+    ALG_CompV_Test();
 }
