@@ -185,7 +185,7 @@ static __device__ void _MAX_MIN_min_vec_2DMat(float *array, float *min, int *mut
     unsigned int stride = gridDim.x * blockDim.x;
     unsigned int offset = 0;
 
-    __shared__ float cache[CONFIG_THREADS_PER_BLOCK_2D];
+    __shared__ float cache[CONFIG_THREADS_PER_BLOCK_1D];
 
 
     float temp = MAX_MIN_INF;
@@ -229,9 +229,7 @@ static __device__ void _MAX_MIN_min_vec_2DMat(float *array, float *min, int *mut
  */
 __global__ void MAX_MIN_min_vec_2DMat_kernel(Tp_fMat_TypeDef MatIn, Tp_fVec_TypeDef VecOut, int *mutex)
 {
-    size_t row = blockIdx.y * blockDim.y + threadIdx.y;
-
-    if (row < MatIn.Height)
+    for (size_t row = 0; row < MatIn.Height; row++)
     {
         _MAX_MIN_min_vec_2DMat(MAT_GetRow_Vec(MatIn, row), &VecOut.pElements[row], &mutex[row], MatIn.Width);
     }

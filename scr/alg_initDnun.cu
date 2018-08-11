@@ -90,8 +90,10 @@ void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Vec, Tp_fVec_TypeDef dNUN_Vec)
     dim3 dimGrid((d_S_Mat.Width + dimBlock.x - 1) / dimBlock.x, (d_S_Mat.Height + dimBlock.y - 1) / dimBlock.y);
     ALG_initDnun_Kernel << < dimGrid, dimBlock >> > (d_Z_Row, d_Z_Col, d_S_Mat);
     cudaDeviceSynchronize();
-    //Doesn't work,
-    MAX_MIN_min_vec_2DMat_kernel << < dimGrid, dimBlock >> > (d_S_Mat, d_dNUN_Vec, d_mutex);
+
+    int tdimBlock = DimBlck.Bl_1d;
+    int tdimGrid = (int) ((d_S_Mat.Width + tdimBlock - 1) / tdimBlock);
+    MAX_MIN_min_vec_2DMat_kernel << < tdimGrid, tdimBlock >> > (d_S_Mat, d_dNUN_Vec, d_mutex);
     cudaDeviceSynchronize();
 
     checkCudaErrors(cudaMemcpy(h_S_Mat.pElements, d_S_Mat.pElements, Size, cudaMemcpyDeviceToHost));
