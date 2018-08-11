@@ -94,10 +94,18 @@ void ALG_compDistFromEx_Launch(const Tp_intVec_TypeDef Z_Vec, const Tp_intVec_Ty
  */
 void ALG_compDistFromEx_Test(void)
 {
-    int z_arr[] = {1, 3, 4, 5, 7};
-    int u_arr[] = {8, 9, 10};
-    Tp_intVec_TypeDef Z_Vec;
-    Tp_intVec_TypeDef U_Vec;
+    Tp_Z_TypeDef z_arr[] = {
+            {TYPES_NUM_OF_FEATURES, {2.0, 3.0}, 1, 0},
+            {TYPES_NUM_OF_FEATURES, {1.0, 5.0}, 1, 0},
+            {TYPES_NUM_OF_FEATURES, {7.0, 3.0}, 3, 0}
+    };
+    Tp_Z_TypeDef u_arr[] = {
+            {TYPES_NUM_OF_FEATURES, {1.0, 2.0}, 0, 0},
+            {TYPES_NUM_OF_FEATURES, {7.0, 3.0}, 0, 0},
+    };
+
+    Tp_Z_Vec_TypeDef Z_Vec;
+    Tp_Z_Vec_TypeDef U_Vec;
     Tp_fMat_TypeDef D_Mat;
     size_t Size;
 
@@ -116,8 +124,8 @@ void ALG_compDistFromEx_Test(void)
         return;
     }
     MAT_SetElementAll(D_Mat, 0.0);
-    MAT_PrintVecInt(Z_Vec);
-    MAT_PrintVecInt(U_Vec);
+    MISC_Print_Z_Vec(Z_Vec);
+    MISC_Print_Z_Vec(U_Vec);
     MAT_PrintMat(D_Mat);
     ALG_compDistFromEx_Launch(Z_Vec, U_Vec, D_Mat);
     MAT_PrintMat(D_Mat);

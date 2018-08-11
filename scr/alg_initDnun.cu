@@ -146,19 +146,7 @@ void ALG_initDnun_Test(void)
 
     dNUN.Size = MISC_NUM_OF_ELEMENTS(z_arr);
     dNUN.pElements = dNUN_arr;
-
-    for (int i = 0; i < Z_Vec.Size; i++)
-    {
-        printf("label:%d, is_proto:%d, num_of_features:%d ->[",
-               Z_Vec.pElements[i].Label,
-               Z_Vec.pElements[i].IsProto,
-               Z_Vec.pElements[i].Size);
-        for (int j = 0; j < Z_Vec.pElements[i].Size; j++)
-        {
-            printf("%.2f ", Z_Vec.pElements[i].Feature_Arr[j]);
-        }
-        printf("]\n");
-    }
+    MISC_Print_Z_Vec(Z_Vec);
     ALG_initDnun_Launch(Z_Vec, dNUN);
 
     printf("dNUN=");

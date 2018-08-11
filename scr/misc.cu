@@ -64,3 +64,26 @@ MISC_Bl_Size_TypeDef MISC_Get_Block_Size(void)
 {
     return sMISC_Block_Size;
 }
+
+/**
+ *@brief Print z vector
+ *@param
+ *@retval None
+ */
+void MISC_Print_Z_Vec(Tp_Z_Vec_TypeDef Z_Vec)
+{
+    for (int i = 0; i < Z_Vec.Size; i++)
+    {
+        printf("label:%d, is_proto:%d, num_of_features:%d ->[",
+               Z_Vec.pElements[i].Label,
+               Z_Vec.pElements[i].IsProto,
+               Z_Vec.pElements[i].Size);
+        for (int j = 0; j < Z_Vec.pElements[i].Size; j++)
+        {
+            printf("%.2f ", Z_Vec.pElements[i].Feature_Arr[j]);
+        }
+        printf("]\n");
+    }
+}
+
+

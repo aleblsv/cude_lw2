@@ -8,6 +8,7 @@
 #define MISC_H
 
 #include <stdint.h>
+#include "types.h"
 
 /* Global define ------------------------------------------------------------*/
 #define MISC_NUM_OF_ELEMENTS(X)           (sizeof(X) / sizeof(X[0]))
@@ -22,5 +23,6 @@ typedef struct
 /* Global function prototypes -----------------------------------------------*/
 void MISC_Check_Device(void);
 MISC_Bl_Size_TypeDef MISC_Get_Block_Size(void);
+void MISC_Print_Z_Vec(Tp_Z_Vec_TypeDef Z_Vec);
 
 #endif //MISC_H
