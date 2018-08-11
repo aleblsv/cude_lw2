@@ -233,7 +233,7 @@ __global__ void MAX_MIN_min_vec_2DMat_kernel(Tp_fMat_TypeDef MatIn, Tp_fVec_Type
 
     if (row < MatIn.Height)
     {
-        _MAX_MIN_min_vec_2DMat(MAT_GetRow_Vec(MatIn, row), &VecOut.pElements[row], mutex, MatIn.Width);
+        _MAX_MIN_min_vec_2DMat(MAT_GetRow_Vec(MatIn, row), &VecOut.pElements[row], &mutex[row], MatIn.Width);
     }
 }
 

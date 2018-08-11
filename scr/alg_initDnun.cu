@@ -62,8 +62,6 @@ void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Vec, Tp_fVec_TypeDef dNUN_Vec)
     sdkResetTimer(&timer);
     sdkStartTimer(&timer);
 
-    checkCudaErrors(cudaMalloc(&d_mutex, sizeof(int)));
-
     d_Z_Row = Z_Vec;
     Size = d_Z_Row.Size * sizeof(Tp_Z_TypeDef);
     checkCudaErrors(cudaMalloc(&d_Z_Row.pElements, Size));
@@ -77,6 +75,7 @@ void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Vec, Tp_fVec_TypeDef dNUN_Vec)
     d_dNUN_Vec = dNUN_Vec;
     Size = d_dNUN_Vec.Size * sizeof(float);
     checkCudaErrors(cudaMalloc(&d_dNUN_Vec.pElements, Size));
+    checkCudaErrors(cudaMalloc(&d_mutex, sizeof(int) * d_dNUN_Vec.Size));
 
     d_S_Mat.Width = d_Z_Col.Size;
     d_S_Mat.Height = d_Z_Row.Size;
@@ -91,6 +90,7 @@ void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Vec, Tp_fVec_TypeDef dNUN_Vec)
     dim3 dimGrid((d_S_Mat.Width + dimBlock.x - 1) / dimBlock.x, (d_S_Mat.Height + dimBlock.y - 1) / dimBlock.y);
     ALG_initDnun_Kernel << < dimGrid, dimBlock >> > (d_Z_Row, d_Z_Col, d_S_Mat);
     cudaDeviceSynchronize();
+    //Doesn't work,
     MAX_MIN_min_vec_2DMat_kernel << < dimGrid, dimBlock >> > (d_S_Mat, d_dNUN_Vec, d_mutex);
     cudaDeviceSynchronize();
 
