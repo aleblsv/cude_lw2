@@ -29,7 +29,6 @@ __global__ void ALG_CompV_Kernel(const Tp_fMat_TypeDef D_Mat,
 {
     size_t row = blockIdx.y * blockDim.y + threadIdx.y;
     size_t col = blockIdx.x * blockDim.x + threadIdx.x;
-    float tVal;
 
     // V_Mat already initialized to zero
     if (row < V_Mat.Height && col < V_Mat.Width)
@@ -42,9 +41,7 @@ __global__ void ALG_CompV_Kernel(const Tp_fMat_TypeDef D_Mat,
                 {
                     if (Z_Vec.pElements[i].Label == row)
                     {
-                        tVal = MAT_GetElement(V_Mat, row, i);
-                        tVal++;
-                        MAT_SetElement(V_Mat, row, i, tVal);
+                        atomicAdd(MAT_GetElementRef(V_Mat, row, i), 1);
                     }
                 }
             }
@@ -60,15 +57,15 @@ __global__ void ALG_CompV_Kernel(const Tp_fMat_TypeDef D_Mat,
 void ALG_CompV_Launch(const Tp_fMat_TypeDef D_Mat,
                       const Tp_fVec_TypeDef dNUN_Vec,
                       const Tp_intVec_TypeDef r_Vec,
+                      const Tp_Z_Vec_TypeDef Z_Vec,
                       Tp_fMat_TypeDef V_Mat)
 {
     StopWatchInterface *timer = NULL;
-
-    Tp_fMat_TypeDef D_Mat;
-    Tp_fVec_TypeDef d_dNUN_Vec;
-    int *d_mutex;
-
-    Tp_fMat_TypeDef h_S_Mat;
+    Tp_fMat_TypeDef d_D_Mat,
+    Tp_fVec_TypeDef d_dNUN_Vec,
+    Tp_intVec_TypeDef d_r_Vec,
+    Tp_Z_Vec_TypeDef d_Z_Vec,
+    Tp_fMat_TypeDef d_V_Mat
     size_t Size;
     MISC_Bl_Size_TypeDef DimBlck = MISC_Get_Block_Size();
 
@@ -77,63 +74,45 @@ void ALG_CompV_Launch(const Tp_fMat_TypeDef D_Mat,
     sdkResetTimer(&timer);
     sdkStartTimer(&timer);
 
-    d_Z_Row = Z_Vec;
-    Size = d_Z_Row.Size * sizeof(Tp_Z_TypeDef);
-    checkCudaErrors(cudaMalloc(&d_Z_Row.pElements, Size));
-    checkCudaErrors(cudaMemcpy(d_Z_Row.pElements, Z_Vec.pElements, Size, cudaMemcpyHostToDevice));
-
-    d_Z_Col = Z_Vec;
-    Size = d_Z_Col.Size * sizeof(Tp_Z_TypeDef);
-    checkCudaErrors(cudaMalloc(&d_Z_Col.pElements, Size));
-    checkCudaErrors(cudaMemcpy(d_Z_Col.pElements, Z_Vec.pElements, Size, cudaMemcpyHostToDevice));
+    d_D_Mat = D_Mat;
+    Size = d_D_Mat.Width * d_D_Mat.Height * sizeof(float);
+    checkCudaErrors(cudaMalloc(&d_D_Mat.pElements, Size));
+    checkCudaErrors(cudaMemcpy(d_D_Mat.pElements, D_Mat.pElements, Size, cudaMemcpyHostToDevice));
 
     d_dNUN_Vec = dNUN_Vec;
     Size = d_dNUN_Vec.Size * sizeof(float);
     checkCudaErrors(cudaMalloc(&d_dNUN_Vec.pElements, Size));
-    checkCudaErrors(cudaMalloc(&d_mutex, sizeof(int) * d_dNUN_Vec.Size));
+    checkCudaErrors(cudaMemcpy(d_dNUN_Vec.pElements, d_dNUN_Vec.pElements, Size, cudaMemcpyHostToDevice));
 
-    d_S_Mat.Width = d_Z_Col.Size;
-    d_S_Mat.Height = d_Z_Row.Size;
-    Size = d_S_Mat.Width * d_S_Mat.Height * sizeof(float);
-    checkCudaErrors(cudaMalloc(&d_S_Mat.pElements, Size));
-    h_S_Mat = d_S_Mat;
-    h_S_Mat.pElements = (float *) malloc(Size);
-    MAT_SetElementAll(h_S_Mat, 0.0);
+    d_r_Vec = r_Vec;
+    Size = d_r_Vec.Size * sizeof(int);
+    checkCudaErrors(cudaMalloc(&d_r_Vec.pElements, Size));
+    checkCudaErrors(cudaMemcpy(d_r_Vec.pElements, r_Vec.pElements, Size, cudaMemcpyHostToDevice));
+
+    d_Z_Vec = Z_Vec;
+    Size = d_Z_Vec.Size * sizeof(Tp_Z_TypeDef);
+    checkCudaErrors(cudaMalloc(&d_Z_Vec.pElements, Size));
+    checkCudaErrors(cudaMemcpy(d_Z_Vec.pElements, Z_Vec.pElements, Size, cudaMemcpyHostToDevice));
+
+    d_V_Mat = V_Mat;
+    Size = d_V_Mat.Width * d_V_Mat.Height * sizeof(float);
+    checkCudaErrors(cudaMalloc(&d_V_Mat.pElements, Size));
+    checkCudaErrors(cudaMemset(d_V_Mat.pElements, 0x00, Size));
 
     // Invoke kernel
     dim3 dimBlock(DimBlck.Bl_2d, DimBlck.Bl_2d);
-    dim3 dimGrid((d_S_Mat.Width + dimBlock.x - 1) / dimBlock.x, (d_S_Mat.Height + dimBlock.y - 1) / dimBlock.y);
-    ALG_CompV_Kernel << < dimGrid, dimBlock >> > (d_Z_Row, d_Z_Col, d_S_Mat);
+    dim3 dimGrid((d_V_Mat.Width + dimBlock.x - 1) / dimBlock.x, (d_V_Mat.Height + dimBlock.y - 1) / dimBlock.y);
+    ALG_CompV_Kernel << < tdimGrid, tdimBlock >> > (d_S_Mat, d_dNUN_Vec, d_r_Vec, d_Z_Vec, d_V_Mat);
     cudaDeviceSynchronize();
 
-    int tdimBlock = DimBlck.Bl_1d;
-    int tdimGrid = (int) ((d_S_Mat.Width + tdimBlock - 1) / tdimBlock);
-    MAX_MIN_min_vec_2DMat_kernel << < tdimGrid, tdimBlock >> > (d_S_Mat, d_dNUN_Vec, d_mutex);
-    cudaDeviceSynchronize();
-
-    checkCudaErrors(cudaMemcpy(h_S_Mat.pElements, d_S_Mat.pElements, Size, cudaMemcpyDeviceToHost));
-    checkCudaErrors(cudaMemcpy(dNUN_Vec.pElements, d_dNUN_Vec.pElements, d_dNUN_Vec.Size * sizeof(float),
-                               cudaMemcpyDeviceToHost));
-    printf("S matrix:\n");
-    MAT_PrintMat(h_S_Mat);
-//
-//    printf("S matrix print by vec:\n");
-//    Tp_fVec_TypeDef tVec;
-//    for (int i = 0; i < h_S_Mat.Height; ++i)
-//    {
-//        tVec.pElements = MAT_GetRow_Vec(h_S_Mat, i);
-//        tVec.Size = h_S_Mat.Width;
-//        MAT_PrintVecFloat(tVec);
-//    }
-
-    free(h_S_Mat.pElements);
+    checkCudaErrors(cudaMemcpy(V_Mat.pElements, d_V_Mat.pElements, Size, cudaMemcpyDeviceToHost));
 
 //    Free device memory
-    checkCudaErrors(cudaFree(d_Z_Row.pElements));
-    checkCudaErrors(cudaFree(d_Z_Col.pElements));
-    checkCudaErrors(cudaFree(d_S_Mat.pElements));
+    checkCudaErrors(cudaFree(d_D_Mat.pElements));
     checkCudaErrors(cudaFree(d_dNUN_Vec.pElements));
-    checkCudaErrors(cudaFree(d_mutex));
+    checkCudaErrors(cudaFree(d_r_Vec.pElements));
+    checkCudaErrors(cudaFree(d_Z_Vec.pElements));
+    checkCudaErrors(cudaFree(d_V_Mat.pElements));
 
     sdkStopTimer(&timer);
     printf("GPU kernel - Complete, time:%fms\n", sdkGetTimerValue(&timer));
