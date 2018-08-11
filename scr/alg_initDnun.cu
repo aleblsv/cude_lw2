@@ -134,7 +134,7 @@ void ALG_initDnun_Test(void)
 {
     Tp_Z_TypeDef z_arr[] = {
             {TYPES_NUM_OF_FEATURES, {2.0, 3.0}, 1, 0},
-            {TYPES_NUM_OF_FEATURES, {1.0, 5.0}, 1, 0},
+            {TYPES_NUM_OF_FEATURES, {1.0, 5.0}, 2, 0},
             {TYPES_NUM_OF_FEATURES, {7.0, 3.0}, 3, 0}
     };
     Tp_Z_TypeDef zl_arr[] = {
