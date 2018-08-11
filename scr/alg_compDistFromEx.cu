@@ -23,14 +23,14 @@
  *@param
  *@retval None
  */
-__global__ void ALG_compDistFromEx_Kernel(Tp_intVec_TypeDef Z_Vec, Tp_intVec_TypeDef U_Vec, Tp_fMat_TypeDef D_Mat)
+__global__ void ALG_compDistFromEx_Kernel(Tp_Z_Vec_TypeDef Z_Vec, Tp_Z_Vec_TypeDef U_Vec, Tp_fMat_TypeDef D_Mat)
 {
     size_t row = blockIdx.y * blockDim.y + threadIdx.y;
     size_t col = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (row < D_Mat.Height && col < D_Mat.Width)
     {
-        MAT_SetElement(D_Mat, row, col, DIST_Calc(Z_Vec.pElements[row], U_Vec.pElements[col]));
+        MAT_SetElement(D_Mat, row, col, DIST_Calc_Feat(Z_Vec.pElements[row], U_Vec.pElements[col]));
     }
 }
 
@@ -39,12 +39,12 @@ __global__ void ALG_compDistFromEx_Kernel(Tp_intVec_TypeDef Z_Vec, Tp_intVec_Typ
  *@param
  *@retval None
  */
-void ALG_compDistFromEx_Launch(const Tp_intVec_TypeDef Z_Vec, const Tp_intVec_TypeDef U_Vec, Tp_fMat_TypeDef D_Mat)
+void ALG_compDistFromEx_Launch(const Tp_Z_Vec_TypeDef Z_Vec, const Tp_Z_Vec_TypeDef U_Vec, Tp_fMat_TypeDef D_Mat)
 {
     StopWatchInterface *timer = NULL;
 
-    Tp_intVec_TypeDef d_Z_Vec;
-    Tp_intVec_TypeDef d_U_Vec;
+    Tp_Z_Vec_TypeDef d_Z_Vec;
+    Tp_Z_Vec_TypeDef d_U_Vec;
     Tp_fMat_TypeDef d_D_Mat;
     size_t Size;
     MISC_Bl_Size_TypeDef DimBlck = MISC_Get_Block_Size();
@@ -55,12 +55,12 @@ void ALG_compDistFromEx_Launch(const Tp_intVec_TypeDef Z_Vec, const Tp_intVec_Ty
     sdkStartTimer(&timer);
 
     d_Z_Vec = Z_Vec;
-    Size = d_Z_Vec.Size * sizeof(int);
+    Size = d_Z_Vec.Size * sizeof(Tp_Z_TypeDef);
     checkCudaErrors(cudaMalloc(&d_Z_Vec.pElements, Size));
     checkCudaErrors(cudaMemcpy(d_Z_Vec.pElements, Z_Vec.pElements, Size, cudaMemcpyHostToDevice));
 
     d_U_Vec = U_Vec;
-    Size = d_U_Vec.Size * sizeof(int);
+    Size = d_U_Vec.Size * sizeof(Tp_Z_TypeDef);
     checkCudaErrors(cudaMalloc(&d_U_Vec.pElements, Size));
     checkCudaErrors(cudaMemcpy(d_U_Vec.pElements, U_Vec.pElements, Size, cudaMemcpyHostToDevice));
 
