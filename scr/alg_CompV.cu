@@ -21,17 +21,33 @@
  *@param
  *@retval None
  */
-__global__ void ALG_CompV_Kernel(Tp_Z_Vec_TypeDef Z_Row, Tp_Z_Vec_TypeDef Z_Col, Tp_fMat_TypeDef S_Mat)
+__global__ void ALG_CompV_Kernel(const Tp_fMat_TypeDef D_Mat,
+                                 const Tp_fVec_TypeDef dNUN_Vec,
+                                 const Tp_intVec_TypeDef r_Vec,
+                                 const Tp_Z_Vec_TypeDef Z_Vec,
+                                 Tp_fMat_TypeDef V_Mat)
 {
     size_t row = blockIdx.y * blockDim.y + threadIdx.y;
     size_t col = blockIdx.x * blockDim.x + threadIdx.x;
+    float tVal;
 
-    if (row < Z_Row.Size && col < Z_Col.Size)
+    // V_Mat already initialized to zero
+    if (row < V_Mat.Height && col < V_Mat.Width)
     {
-        MAT_SetElement(S_Mat, row, col, MAX_MIN_INF);
-        if (Z_Row.pElements[row].Label != Z_Col.pElements[col].Label)
+        if (r_Vec.pElements[col] == 0)
         {
-            MAT_SetElement(S_Mat, row, col, DIST_Calc_Feat(Z_Row.pElements[row], Z_Col.pElements[col]));
+            for (int i = 0; i < dNUN_Vec.Size; i++)
+            {
+                if (MAT_GetElement(D_Mat, row, i) < dNUN_Vec.pElements[i])
+                {
+                    if (Z_Vec.pElements[i].Label == row)
+                    {
+                        tVal = MAT_GetElement(V_Mat, row, i);
+                        tVal++;
+                        MAT_SetElement(V_Mat, row, i, tVal);
+                    }
+                }
+            }
         }
     }
 }
@@ -48,9 +64,7 @@ void ALG_CompV_Launch(const Tp_fMat_TypeDef D_Mat,
 {
     StopWatchInterface *timer = NULL;
 
-    Tp_Z_Vec_TypeDef d_Z_Row;
-    Tp_Z_Vec_TypeDef d_Z_Col;
-    Tp_fMat_TypeDef d_S_Mat;
+    Tp_fMat_TypeDef D_Mat;
     Tp_fVec_TypeDef d_dNUN_Vec;
     int *d_mutex;
 
