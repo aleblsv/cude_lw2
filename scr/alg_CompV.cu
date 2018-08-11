@@ -6,6 +6,9 @@
 #include <stdio.h>
 
 #include "alg_CompV.h"
+#include "alg_compDistFromEx.h"
+#include "alg_initDnun.h"
+
 #include "mat.h"
 #include "misc.h"
 
@@ -126,35 +129,61 @@ void ALG_CompV_Launch(const Tp_fMat_TypeDef D_Mat,
  */
 void ALG_CompV_Test(void)
 {
-//    Tp_Z_TypeDef z_arr[] = {
-//            {TYPES_NUM_OF_FEATURES, {2.0, 3.0}, 1, 0},
-//            {TYPES_NUM_OF_FEATURES, {1.0, 5.0}, 1, 0},
-//            {TYPES_NUM_OF_FEATURES, {7.0, 3.0}, 3, 0}
-//    };
-//    float dNUN_arr[MISC_NUM_OF_ELEMENTS(z_arr)] = {};
-//    Tp_Z_Vec_TypeDef Z_Vec;
-//    Tp_fVec_TypeDef dNUN;
-//
-//    Z_Vec.Size = MISC_NUM_OF_ELEMENTS(z_arr);
-//    Z_Vec.pElements = z_arr;
-//
-//    dNUN.Size = MISC_NUM_OF_ELEMENTS(z_arr);
-//    dNUN.pElements = dNUN_arr;
-//
-//    for (int i = 0; i < Z_Vec.Size; i++)
-//    {
-//        printf("label:%d, is_proto:%d, num_of_features:%d ->[",
-//               Z_Vec.pElements[i].Label,
-//               Z_Vec.pElements[i].IsProto,
-//               Z_Vec.pElements[i].Size);
-//        for (int j = 0; j < Z_Vec.pElements[i].Size; j++)
-//        {
-//            printf("%.2f ", Z_Vec.pElements[i].Feature_Arr[j]);
-//        }
-//        printf("]\n");
-//    }
-//    ALG_CompV_Launch(Z_Vec, dNUN);
-//
-//    printf("dNUN=");
-//    MAT_PrintVecFloat(dNUN);
+    Tp_Z_TypeDef z_arr[] = {
+            {TYPES_NUM_OF_FEATURES, {2.0, 3.0}, 1, 0},
+            {TYPES_NUM_OF_FEATURES, {1.0, 5.0}, 2, 0},
+            {TYPES_NUM_OF_FEATURES, {7.0, 3.0}, 3, 0}
+    };
+    Tp_Z_TypeDef zl_arr[] = {
+            {TYPES_NUM_OF_FEATURES, {3.0, 1.0}, 1, 1},
+            {TYPES_NUM_OF_FEATURES, {2.0, 4.0}, 3, 1},
+    };
+    Tp_Z_TypeDef u_arr[] = {
+            {TYPES_NUM_OF_FEATURES, {1.0, 2.0}, 0, 0},
+            {TYPES_NUM_OF_FEATURES, {7.0, 3.0}, 0, 0},
+    };
+    float dNUN_arr[MISC_NUM_OF_ELEMENTS(z_arr)];
+    Tp_Z_Vec_TypeDef Z_Vec;
+    Tp_Z_Vec_TypeDef Zl_Vec;
+    Tp_Z_Vec_TypeDef U_Vec;
+    Tp_fMat_TypeDef D_Mat;
+    Tp_fVec_TypeDef dNUN;
+    size_t Size;
+
+    Z_Vec.Size = MISC_NUM_OF_ELEMENTS(z_arr);
+    Z_Vec.pElements = z_arr;
+    Zl_Vec.Size = MISC_NUM_OF_ELEMENTS(zl_arr);
+    Zl_Vec.pElements = zl_arr;
+    U_Vec.Size = MISC_NUM_OF_ELEMENTS(u_arr);
+    U_Vec.pElements = u_arr;
+    dNUN.Size = MISC_NUM_OF_ELEMENTS(z_arr);
+    dNUN.pElements = dNUN_arr;
+
+    D_Mat.Height = Z_Vec.Size;
+    D_Mat.Width = U_Vec.Size;
+    Size = D_Mat.Height * D_Mat.Width * sizeof(float);
+    D_Mat.pElements = (float *) malloc(Size);
+    if (D_Mat.pElements == NULL)
+    {
+        printf("Can't allocate memory\n");
+        return;
+    }
+
+    MAT_SetElementAll(D_Mat, 0.0);
+    printf("Z vector\n");
+    MISC_Print_Z_Vec(Z_Vec);
+    printf("Zl vector\n");
+    MISC_Print_Z_Vec(Zl_Vec);
+    printf("U vector\n");
+    MISC_Print_Z_Vec(U_Vec);
+
+    ALG_compDistFromEx_Launch(Z_Vec, U_Vec, D_Mat);
+    printf("D Mat\n");
+    MAT_PrintMat(D_Mat);
+
+    ALG_initDnun_Launch(Z_Vec, Zl_Vec, dNUN);
+    printf("dNUN vector\n");
+    MAT_PrintVecFloat(dNUN);
+
+    free(D_Mat.pElements);
 }
