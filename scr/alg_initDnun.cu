@@ -43,7 +43,7 @@ __global__ void ALG_initDnun_Kernel(Tp_Z_Vec_TypeDef Z_Row, Tp_Z_Vec_TypeDef Z_C
  *@param
  *@retval None
  */
-void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Vec, Tp_fVec_TypeDef dNUN_Vec)
+void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Vec, const Tp_Z_Vec_TypeDef Zl_Vec, Tp_fVec_TypeDef dNUN_Vec)
 {
     StopWatchInterface *timer = NULL;
 
@@ -67,7 +67,7 @@ void ALG_initDnun_Launch(const Tp_Z_Vec_TypeDef Z_Vec, Tp_fVec_TypeDef dNUN_Vec)
     checkCudaErrors(cudaMalloc(&d_Z_Row.pElements, Size));
     checkCudaErrors(cudaMemcpy(d_Z_Row.pElements, Z_Vec.pElements, Size, cudaMemcpyHostToDevice));
 
-    d_Z_Col = Z_Vec;
+    d_Z_Col = Zl_Vec;
     Size = d_Z_Col.Size * sizeof(Tp_Z_TypeDef);
     checkCudaErrors(cudaMalloc(&d_Z_Col.pElements, Size));
     checkCudaErrors(cudaMemcpy(d_Z_Col.pElements, Z_Vec.pElements, Size, cudaMemcpyHostToDevice));
@@ -137,17 +137,25 @@ void ALG_initDnun_Test(void)
             {TYPES_NUM_OF_FEATURES, {1.0, 5.0}, 1, 0},
             {TYPES_NUM_OF_FEATURES, {7.0, 3.0}, 3, 0}
     };
+    Tp_Z_TypeDef zl_arr[] = {
+            {TYPES_NUM_OF_FEATURES, {3.0, 1.0}, 1, 1},
+            {TYPES_NUM_OF_FEATURES, {2.0, 4.0}, 3, 1},
+    };
+
     float dNUN_arr[MISC_NUM_OF_ELEMENTS(z_arr)];
     Tp_Z_Vec_TypeDef Z_Vec;
+    Tp_Z_Vec_TypeDef Zl_Vec;
     Tp_fVec_TypeDef dNUN;
 
     Z_Vec.Size = MISC_NUM_OF_ELEMENTS(z_arr);
     Z_Vec.pElements = z_arr;
-
+    Zl_Vec.Size = MISC_NUM_OF_ELEMENTS(zl_arr);
+    Zl_Vec.pElements = zl_arr;
     dNUN.Size = MISC_NUM_OF_ELEMENTS(z_arr);
     dNUN.pElements = dNUN_arr;
     MISC_Print_Z_Vec(Z_Vec);
-    ALG_initDnun_Launch(Z_Vec, dNUN);
+    MISC_Print_Z_Vec(Zl_Vec);
+    ALG_initDnun_Launch(Z_Vec, Zl_Vec, dNUN);
 
     printf("dNUN=");
     MAT_PrintVecFloat(dNUN);
