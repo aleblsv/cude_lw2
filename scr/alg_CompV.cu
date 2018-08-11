@@ -102,7 +102,7 @@ void ALG_CompV_Launch(const Tp_fMat_TypeDef D_Mat,
     // Invoke kernel
     dim3 dimBlock(DimBlck.Bl_2d, DimBlck.Bl_2d);
     dim3 dimGrid((d_V_Mat.Width + dimBlock.x - 1) / dimBlock.x, (d_V_Mat.Height + dimBlock.y - 1) / dimBlock.y);
-    ALG_CompV_Kernel << < tdimGrid, tdimBlock >> > (d_S_Mat, d_dNUN_Vec, d_r_Vec, d_Z_Vec, d_V_Mat);
+    ALG_CompV_Kernel << < dimGrid, dimBlock >> > (d_S_Mat, d_dNUN_Vec, d_r_Vec, d_Z_Vec, d_V_Mat);
     cudaDeviceSynchronize();
 
     checkCudaErrors(cudaMemcpy(V_Mat.pElements, d_V_Mat.pElements, Size, cudaMemcpyDeviceToHost));
@@ -126,35 +126,35 @@ void ALG_CompV_Launch(const Tp_fMat_TypeDef D_Mat,
  */
 void ALG_CompV_Test(void)
 {
-    Tp_Z_TypeDef z_arr[] = {
-            {TYPES_NUM_OF_FEATURES, {2.0, 3.0}, 1, 0},
-            {TYPES_NUM_OF_FEATURES, {1.0, 5.0}, 1, 0},
-            {TYPES_NUM_OF_FEATURES, {7.0, 3.0}, 3, 0}
-    };
-    float dNUN_arr[MISC_NUM_OF_ELEMENTS(z_arr)];
-    Tp_Z_Vec_TypeDef Z_Vec;
-    Tp_fVec_TypeDef dNUN;
-
-    Z_Vec.Size = MISC_NUM_OF_ELEMENTS(z_arr);
-    Z_Vec.pElements = z_arr;
-
-    dNUN.Size = MISC_NUM_OF_ELEMENTS(z_arr);
-    dNUN.pElements = dNUN_arr;
-
-    for (int i = 0; i < Z_Vec.Size; i++)
-    {
-        printf("label:%d, is_proto:%d, num_of_features:%d ->[",
-               Z_Vec.pElements[i].Label,
-               Z_Vec.pElements[i].IsProto,
-               Z_Vec.pElements[i].Size);
-        for (int j = 0; j < Z_Vec.pElements[i].Size; j++)
-        {
-            printf("%.2f ", Z_Vec.pElements[i].Feature_Arr[j]);
-        }
-        printf("]\n");
-    }
-    ALG_CompV_Launch(Z_Vec, dNUN);
-
-    printf("dNUN=");
-    MAT_PrintVecFloat(dNUN);
+//    Tp_Z_TypeDef z_arr[] = {
+//            {TYPES_NUM_OF_FEATURES, {2.0, 3.0}, 1, 0},
+//            {TYPES_NUM_OF_FEATURES, {1.0, 5.0}, 1, 0},
+//            {TYPES_NUM_OF_FEATURES, {7.0, 3.0}, 3, 0}
+//    };
+//    float dNUN_arr[MISC_NUM_OF_ELEMENTS(z_arr)] = {};
+//    Tp_Z_Vec_TypeDef Z_Vec;
+//    Tp_fVec_TypeDef dNUN;
+//
+//    Z_Vec.Size = MISC_NUM_OF_ELEMENTS(z_arr);
+//    Z_Vec.pElements = z_arr;
+//
+//    dNUN.Size = MISC_NUM_OF_ELEMENTS(z_arr);
+//    dNUN.pElements = dNUN_arr;
+//
+//    for (int i = 0; i < Z_Vec.Size; i++)
+//    {
+//        printf("label:%d, is_proto:%d, num_of_features:%d ->[",
+//               Z_Vec.pElements[i].Label,
+//               Z_Vec.pElements[i].IsProto,
+//               Z_Vec.pElements[i].Size);
+//        for (int j = 0; j < Z_Vec.pElements[i].Size; j++)
+//        {
+//            printf("%.2f ", Z_Vec.pElements[i].Feature_Arr[j]);
+//        }
+//        printf("]\n");
+//    }
+//    ALG_CompV_Launch(Z_Vec, dNUN);
+//
+//    printf("dNUN=");
+//    MAT_PrintVecFloat(dNUN);
 }

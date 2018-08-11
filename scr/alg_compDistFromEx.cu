@@ -96,30 +96,30 @@ void ALG_compDistFromEx_Test(void)
 {
     int z_arr[] = {1, 3, 4, 5, 7};
     int u_arr[] = {8, 9, 10};
-    Tp_intVec_TypeDef h_Z_Vec;
-    Tp_intVec_TypeDef h_U_Vec;
-    Tp_fMat_TypeDef h_D_Mat;
+    Tp_intVec_TypeDef Z_Vec;
+    Tp_intVec_TypeDef U_Vec;
+    Tp_fMat_TypeDef D_Mat;
     size_t Size;
 
-    h_Z_Vec.pElements = z_arr;
-    h_Z_Vec.Size = sizeof(z_arr) / sizeof(z_arr[0]);
-    h_U_Vec.pElements = u_arr;
-    h_U_Vec.Size = sizeof(u_arr) / sizeof(u_arr[0]);
+    Z_Vec.pElements = z_arr;
+    Z_Vec.Size = sizeof(z_arr) / sizeof(z_arr[0]);
+    U_Vec.pElements = u_arr;
+    U_Vec.Size = sizeof(u_arr) / sizeof(u_arr[0]);
 
-    h_D_Mat.Height = h_Z_Vec.Size;
-    h_D_Mat.Width = h_U_Vec.Size;
-    Size = h_D_Mat.Height * h_D_Mat.Width * sizeof(float);
-    h_D_Mat.pElements = (float *) malloc(Size);
-    if (h_D_Mat.pElements == NULL)
+    D_Mat.Height = Z_Vec.Size;
+    D_Mat.Width = U_Vec.Size;
+    Size = D_Mat.Height * D_Mat.Width * sizeof(float);
+    D_Mat.pElements = (float *) malloc(Size);
+    if (D_Mat.pElements == NULL)
     {
         printf("Can't allocate memory\n");
         return;
     }
-    MAT_SetElementAll(h_D_Mat, 0.0);
-    MAT_PrintVecInt(h_Z_Vec);
-    MAT_PrintVecInt(h_U_Vec);
-    MAT_PrintMat(h_D_Mat);
-    ALG_compDistFromEx_Launch(h_Z_Vec, h_U_Vec, h_D_Mat);
-    MAT_PrintMat(h_D_Mat);
-    free(h_D_Mat.pElements);
+    MAT_SetElementAll(D_Mat, 0.0);
+    MAT_PrintVecInt(Z_Vec);
+    MAT_PrintVecInt(U_Vec);
+    MAT_PrintMat(D_Mat);
+    ALG_compDistFromEx_Launch(Z_Vec, U_Vec, D_Mat);
+    MAT_PrintMat(D_Mat);
+    free(D_Mat.pElements);
 }
