@@ -9,6 +9,7 @@
 
 #include "config.h"
 #include "jetbrains_ide.h"
+#include "types.h"
 
 /* Global define ------------------------------------------------------------*/
 #define MAX_MIN_INF         0x7f800000

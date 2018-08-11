@@ -27,6 +27,7 @@
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="scr\alg_compDistFromEx.cu" />
+    <CudaCompile Include="scr\alg_CompV.cu" />
     <CudaCompile Include="scr\alg_initDnun.cu" />
     <CudaCompile Include="scr\dist.cu" />
     <CudaCompile Include="scr\lw.cu" />

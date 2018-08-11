@@ -61,11 +61,11 @@ void ALG_CompV_Launch(const Tp_fMat_TypeDef D_Mat,
                       Tp_fMat_TypeDef V_Mat)
 {
     StopWatchInterface *timer = NULL;
-    Tp_fMat_TypeDef d_D_Mat,
-    Tp_fVec_TypeDef d_dNUN_Vec,
-    Tp_intVec_TypeDef d_r_Vec,
-    Tp_Z_Vec_TypeDef d_Z_Vec,
-    Tp_fMat_TypeDef d_V_Mat
+	Tp_fMat_TypeDef d_D_Mat;
+	Tp_fVec_TypeDef d_dNUN_Vec;
+	Tp_intVec_TypeDef d_r_Vec;
+	Tp_Z_Vec_TypeDef d_Z_Vec;
+	Tp_fMat_TypeDef d_V_Mat;
     size_t Size;
     MISC_Bl_Size_TypeDef DimBlck = MISC_Get_Block_Size();
 
@@ -102,7 +102,7 @@ void ALG_CompV_Launch(const Tp_fMat_TypeDef D_Mat,
     // Invoke kernel
     dim3 dimBlock(DimBlck.Bl_2d, DimBlck.Bl_2d);
     dim3 dimGrid((d_V_Mat.Width + dimBlock.x - 1) / dimBlock.x, (d_V_Mat.Height + dimBlock.y - 1) / dimBlock.y);
-    ALG_CompV_Kernel << < dimGrid, dimBlock >> > (d_S_Mat, d_dNUN_Vec, d_r_Vec, d_Z_Vec, d_V_Mat);
+    ALG_CompV_Kernel << < dimGrid, dimBlock >> > (d_D_Mat, d_dNUN_Vec, d_r_Vec, d_Z_Vec, d_V_Mat);
     cudaDeviceSynchronize();
 
     checkCudaErrors(cudaMemcpy(V_Mat.pElements, d_V_Mat.pElements, Size, cudaMemcpyDeviceToHost));
