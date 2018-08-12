@@ -33,6 +33,7 @@ __global__ void ALG_CompV_Kernel(const Tp_fMat_TypeDef D_Mat,
     size_t row = blockIdx.y * blockDim.y + threadIdx.y;
     size_t col = blockIdx.x * blockDim.x + threadIdx.x;
 
+    // k = row
     // V_Mat already initialized to zero
     if (row < V_Mat.Height && col < V_Mat.Width)
     {
@@ -40,11 +41,11 @@ __global__ void ALG_CompV_Kernel(const Tp_fMat_TypeDef D_Mat,
         {
             for (int i = 0; i < dNUN_Vec.Size; i++)
             {
-                if (MAT_GetElement(D_Mat, row, i) < dNUN_Vec.pElements[i])
+                if (MAT_GetElement(D_Mat, i, col) < dNUN_Vec.pElements[i])
                 {
-                    if (Z_Vec.pElements[i].Label == row)
+                    if (Z_Vec.pElements[i].Label == (row + 1))
                     {
-                        atomicAdd(MAT_GetElementRef(V_Mat, row, i), 1);
+                        atomicAdd(MAT_GetElementRef(V_Mat, row, col), 1);
                     }
                 }
             }
@@ -143,11 +144,14 @@ void ALG_CompV_Test(void)
             {TYPES_NUM_OF_FEATURES, {7.0, 3.0}, 0, 0},
     };
     float dNUN_arr[MISC_NUM_OF_ELEMENTS(z_arr)];
+    int r_arr[MISC_NUM_OF_ELEMENTS(z_arr)] = {0};
     Tp_Z_Vec_TypeDef Z_Vec;
     Tp_Z_Vec_TypeDef Zl_Vec;
     Tp_Z_Vec_TypeDef U_Vec;
     Tp_fMat_TypeDef D_Mat;
+    Tp_fMat_TypeDef V_Mat;
     Tp_fVec_TypeDef dNUN;
+    Tp_intVec_TypeDef r_Vec;
     size_t Size;
 
     Z_Vec.Size = MISC_NUM_OF_ELEMENTS(z_arr);
@@ -158,12 +162,23 @@ void ALG_CompV_Test(void)
     U_Vec.pElements = u_arr;
     dNUN.Size = MISC_NUM_OF_ELEMENTS(z_arr);
     dNUN.pElements = dNUN_arr;
+    r_Vec.Size = MISC_NUM_OF_ELEMENTS(z_arr);
+    r_Vec.pElements = r_arr;
 
     D_Mat.Height = Z_Vec.Size;
     D_Mat.Width = U_Vec.Size;
     Size = D_Mat.Height * D_Mat.Width * sizeof(float);
     D_Mat.pElements = (float *) malloc(Size);
     if (D_Mat.pElements == NULL)
+    {
+        printf("Can't allocate memory\n");
+        return;
+    }
+    V_Mat.Height = 3; //Number of labels
+    V_Mat.Width = U_Vec.Size;
+    Size = V_Mat.Height * V_Mat.Width * sizeof(float);
+    V_Mat.pElements = (float *) malloc(Size);
+    if (V_Mat.pElements == NULL)
     {
         printf("Can't allocate memory\n");
         return;
@@ -185,5 +200,10 @@ void ALG_CompV_Test(void)
     printf("dNUN vector\n");
     MAT_PrintVecFloat(dNUN);
 
+    ALG_CompV_Launch(D_Mat, dNUN, r_Vec, Z_Vec, V_Mat);
+    printf("V Mat\n");
+    MAT_PrintMat(V_Mat);
+
     free(D_Mat.pElements);
+    free(V_Mat.pElements);
 }
